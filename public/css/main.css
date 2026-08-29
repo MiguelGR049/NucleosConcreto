@@ -1,0 +1,27 @@
+.login {
+    background-color: white;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    height: 100vh;
+    overflow-x: hidden;
+    font-family: 'Poppins', sans-serif;
+}
+
+.card{
+    background-color: rgba(16,77,141);
+    width: 100%;
+    max-width: 300px; 
+    margin: 0 auto;
+    color: rgb(225, 92, 0);
+    box-shadow: 0 15px 40px rgba(0,0,0,.2);
+}
+
+#logo {
+    width: 125px;
+    height: 125px;
+    object-fit: cover;
+    filter: drop-shadow(0 0 5px rgba(0,0,0,.5));
+}
