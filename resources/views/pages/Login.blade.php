@@ -2,7 +2,7 @@
 
 @section('contenido')
 
-<div class="container vh-100 d-flex justify-content-center align-items-center mt-2">
+<div class="container vh-100 justify-content-center align-items-center mt-5">
     <form method="post" action="" class="w-100">
         @csrf
         <div class="card mx-auto">
@@ -19,13 +19,7 @@
 
                 <div class="mb-3">
                     <label for="usuario" class="form-label fw-bold">Usuario</label>
-                    <input
-                        type="text"
-                        name="usuario"
-                        id="usuario"
-                        class="form-control"
-                        value="{{ old('usuario') }}"
-                        required>
+                    <input type="text" name="usuario" id="usuario" class="form-control" value="{{ old('usuario') }}" required>
 
                     @error('usuario')
                     <div class="text-danger mt-1">
@@ -38,18 +32,13 @@
                     <label for="password" class="form-label fw-bold">Contraseña</label>
 
                     <div class="input-group">
-                        <input
-                            type="password"
-                            name="password"
-                            id="password"
-                            class="form-control"
-                            required>
+                        <input type="password" name="password" id="password" class="form-control" required>
 
                         <button
                             type="button"
                             class="btn btn-outline-secondary"
                             onclick="mostrarPassword()">
-                            <i class="fa-solid fa-eye"></i>
+                            <i id="icono-ojo" class="fa-solid fa-eye-slash"></i>
                         </button>
                     </div>
 
@@ -75,11 +64,15 @@
 <script>
     function mostrarPassword() {
         const password = document.getElementById('password');
-
+        const iconoOjo = document.getElementById('icono-ojo');
         if (password.type === 'password') {
             password.type = 'text';
+            iconoOjo.classList.remove('fa-eye-slash');
+            iconoOjo.classList.add('fa-eye');
         } else {
             password.type = 'password';
+            iconoOjo.classList.remove('fa-eye');
+            iconoOjo.classList.add('fa-eye-slash');
         }
     }
 </script>
