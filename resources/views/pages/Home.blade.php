@@ -1,29 +1,32 @@
 @extends('plantilla')
 
 @section('contenido')
-<div class="container vh-100 justify-content-center align-items-center mt-5">
-    <h1 class="text-center">Ensayos a compresión de núcleos</h1>
 
-    <div class="d-grid gap-2 d-md-block d-flex justify-content-center mt-4">
-        <button id="recepcion" class="btn" type="button">
-            <i class="fa-solid fa-circle-down"></i>
-            Recepción 
-        </button>
-        <button id="propiedades" class="btn" type="button">
-            <i class="fa-solid fa-list"></i>
+@section('navbar-title', 'Ensayos a compresión de núcleos')
+@include('layouts.navbar')
+
+<div class="container d-flex flex-column justify-content-center align-items-center">
+
+    <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+        <a href="{{ route('recepcion') }}" id="recepcion" class="btn d-flex flex-column justify-content-center align-items-center text-decoration-none">
+            <i class="fa-solid fa-circle-down mb-1"></i>
+            Recepción
+        </a>
+        <a href="#" id="propiedades" class="btn d-flex flex-column justify-content-center align-items-center text-decoration-none">
+            <i class="fa-solid fa-list mb-1"></i>
             Propiedades de ensayo
-        </button>
+        </a>
     </div>
 
-    <div class="d-grid gap-2 d-md-block d-flex justify-content-center mt-4">
-        <button id="ensayo" class="btn" type="button">
-            <i class="fa-solid fa-vial"></i>
+    <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+        <a href="#" id="ensayo" class="btn d-flex flex-column justify-content-center align-items-center text-decoration-none">
+            <i class="fa-solid fa-vial mb-1"></i>
             Ensayo
-        </button>
-        <button id="consulta" class="btn" type="button">
-            <i class="fa-solid fa-search"></i>
+        </a>
+        <a href="#" id="consulta" class="btn d-flex flex-column justify-content-center align-items-center text-decoration-none">
+            <i class="fa-solid fa-search mb-1"></i>
             Consulta resultado
-        </button>
+        </a>
     </div>
 
 </div>

@@ -1,5 +1,8 @@
+/* ===========================
+   BASE / GLOBAL
+=========================== */
 body {
-    background-color: rgba(16,77,141);
+    background-color: rgb(16, 77, 141);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -8,27 +11,140 @@ body {
     color: rgb(225, 92, 0);
 }
 
+/* ===========================
+   LOGIN
+=========================== */
 .login {
     min-height: 100vh;
     height: 100vh;
     overflow-x: hidden;
 }
 
-.card{
+.card {
     background-color: rgb(255, 255, 255);
     width: 100%;
-    max-width: 300px; 
+    max-width: 300px;
     margin: 0 auto;
-    box-shadow: 0 15px 40px rgba(0,0,0,.2);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, .2);
+}
+
+.recepcion-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    max-width: 500px;   /* le damos su propio ancho, ya no hereda los 300px del login */
+    width: 100%;
+    margin: 0 auto;
 }
 
 #logo {
     width: 125px;
     height: 125px;
     object-fit: cover;
-    filter: drop-shadow(0 0 5px rgba(0,0,0,.5));
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, .5));
 }
 
+/* ===========================
+   NAVBAR
+=========================== */
+.navbar {
+    background-color: rgb(255, 255, 255);
+    font-family: 'Poppins', sans-serif;
+    min-height: 60px;
+}
+
+.navbar-left,
+.navbar-toggler {
+    width: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.navbar-center {
+    color: rgb(225, 92, 0);
+    font-family: 'Poppins', sans-serif;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: calc(100% - 100px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    pointer-events: none;
+    cursor: default;
+}
+
+.back-arrow-btn {
+    color: rgb(225, 92, 0);
+    font-size: 1.4rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.back-arrow-btn:hover {
+    color: rgb(180, 70, 0);
+}
+
+.navbar-toggler {
+    border-color: rgba(225, 92, 0, 0.5);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgb(225, 92, 0)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* ===========================
+   OFFCANVAS (menú lateral)
+=========================== */
+.offcanvas {
+    font-family: 'Poppins', sans-serif;
+    background-color: rgb(255, 255, 255);
+}
+
+.offcanvas-end {
+    width: 250px;
+}
+
+.offcanvas-title {
+    color: rgb(225, 92, 0);
+    font-weight: 600;
+}
+
+.offcanvas .nav-link {
+    color: rgb(225, 92, 0);
+    font-family: 'Poppins', sans-serif;
+    padding: 0.6rem 0.5rem;
+}
+
+.offcanvas .nav-link:hover,
+.offcanvas .nav-link.active {
+    color: rgb(180, 70, 0);
+    background-color: rgba(225, 92, 0, 0.08);
+    border-radius: 6px;
+}
+
+.offcanvas .btn-close {
+    opacity: 0.7;
+}
+
+.cerrar-sesion-btn {
+    background-color: rgb(220, 53, 69);
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    border: none;
+}
+
+.cerrar-sesion-btn:hover {
+    background-color: rgb(180, 40, 55);
+    color: #fff;
+}
+
+/* ===========================
+   BOTONES DE INICIO (Home)
+=========================== */
 #recepcion,
 #propiedades,
 #ensayo,
@@ -38,6 +154,7 @@ body {
 
     width: 200px;
     height: 100px;
+    flex: 0 0 auto; /* evita que se estiren/encojan en flexbox */
 
     border: 1px solid #dcdcdc;
     border-radius: 8px;
@@ -57,5 +174,63 @@ body {
 #ensayo:active,
 #consulta:active {
     transform: scale(0.95);
-    box-shadow: 0 5px 15px rgba(0,0,0,.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .2);
+}
+
+/* Ajuste responsive: botones más compactos en pantallas de celular */
+@media (max-width: 480px) {
+    #recepcion,
+    #propiedades,
+    #ensayo,
+    #consulta {
+        width: 160px;
+        height: 110px;
+        font-size: 15px;
+    }
+}
+
+/* ===========================
+   FORMULARIO DE RECEPCIÓN
+=========================== */
+.recepcion-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.form-title {
+    color: rgb(225, 92, 0);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+.form-label {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: rgb(225, 92, 0);
+    box-shadow: 0 0 0 0.2rem rgba(225, 92, 0, 0.15);
+}
+
+.form-check-input:checked {
+    background-color: rgb(225, 92, 0);
+    border-color: rgb(225, 92, 0);
+}
+
+.btn-guardar {
+    background-color: rgb(225, 92, 0);
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    padding: 0.5rem 2rem;
+    border: none;
+}
+
+.btn-guardar:hover {
+    background-color: rgb(180, 70, 0);
+    color: #fff;
 }
