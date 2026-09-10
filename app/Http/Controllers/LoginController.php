@@ -30,20 +30,13 @@ class LoginController extends Controller
 
         $consulta = User::where("usuario", $request->usuario)->first();
 
-        if (!$consulta) {
-            throw ValidationException::withMessages([
-                "usuario" => "Usuario no encontrado"
-            ]);
-        }
-
-        if (!password_verify($request->password, $consulta->password)) {
-            throw ValidationException::withMessages([
-                "password" => "Contraseña incorrecta"
-            ]);
+        if (!$consulta || !password_verify($request->password, $consulta->password)) {
+            return back()
+                ->withInput($request->only('usuario'))
+                ->with('error', 'Usuario o contraseña incorrectos');
         }
 
         session()->put("sesionUsuario", $consulta->id);
-        session()->put("rol", $consulta->roles);
 
         return redirect()->route("inicio");
     }

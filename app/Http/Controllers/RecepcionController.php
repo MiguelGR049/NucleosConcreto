@@ -9,30 +9,32 @@ class RecepcionController extends Controller
 {
     public function crear()
     {
-        // Datos de ejemplo (temporales, luego vendrán de la BD)
-        $obras = [
-            (object)['id' => 1, 'clave' => 'OB-001'],
-            (object)['id' => 2, 'clave' => 'OB-002'],
-        ];
+        if (!session()->has('sesionUsuario')) {
+            return redirect()->route("login");
+        }
 
         $elementos = [
-            (object)['id' => 1, 'nombre' => 'Columna'],
-            (object)['id' => 2, 'nombre' => 'Losa'],
-            (object)['id' => 3, 'nombre' => 'Trabe'],
-            (object)['id' => 4, 'nombre' => 'Muro'],
+            (object)['id' => 1, 'nombre' => 'COLUMNA'],
+            (object)['id' => 2, 'nombre' => 'LOSA'],
+            (object)['id' => 3, 'nombre' => 'TRABE'],
+            (object)['id' => 4, 'nombre' => 'MURO'],
         ];
 
-        $folioGenerado = 'A1B2C3'; // temporal, luego se generará dinámico
+        $folioGenerado = 'A1B2C3';
 
         $usuario = User::find(session('sesionUsuario'));
+
+        $nombreCompletoUsuario = $usuario
+            ? trim("{$usuario->nombre} {$usuario->AP_paterno} {$usuario->AP_materno}")
+            : '';
 
         return response()
             ->view("pages.Recepcion", [
                 "titulo" => "Recepción de Núcleos",
-                "obras" => $obras,
                 "elementos" => $elementos,
                 "folioGenerado" => $folioGenerado,
                 "usuario" => $usuario,
+                "nombreCompletoUsuario" => $nombreCompletoUsuario,
             ])
             ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
             ->header('Pragma', 'no-cache')

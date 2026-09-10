@@ -31,20 +31,19 @@
     <div class="offcanvas-body d-flex flex-column">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{{ route('Home') }}">
-                    <i class="bi bi-house-door me-1"></i>Home
+                <a class="nav-link active" aria-current="page" href="{{ route('inicio') }}">
+                    <i class="bi bi-house-door me-1"></i>Inicio
                 </a>
             </li>
         </ul>
 
-        <form class="mt-auto">
-            <a href="" class="btn cerrar-sesion-btn w-100"
-                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        <div class="mt-auto">
+            <a href="#" class="btn cerrar-sesion-btn w-100" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 Cerrar sesión
             </a>
-            <form id="logout-form" action="" method="POST" class="d-none">
+            <form id="logout-form" action="{{ route('cerrar_sesion') }}" method="POST" class="d-none">
                 @csrf
             </form>
-        </form>
+        </div>
     </div>
 </div>

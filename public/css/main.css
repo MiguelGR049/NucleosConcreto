@@ -234,3 +234,27 @@ body {
     background-color: rgb(180, 70, 0);
     color: #fff;
 }
+
+/* Fechas de ensayo */
+.ensayo-fila {
+    width: 100%;
+}
+
+.fecha-aproximada-box {
+    min-width: 100px;
+    text-align: center;
+    padding: 4px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.fecha-aproximada-box.fecha-aproximada-activa {
+    background-color: #fff3ea;
+    border-color: rgb(225, 92, 0);
+    color: rgb(225, 92, 0);
+    font-weight: 600;
+}

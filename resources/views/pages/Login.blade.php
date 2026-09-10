@@ -3,7 +3,7 @@
 @section('contenido')
 
 <div class="container vh-100 justify-content-center align-items-center mt-5">
-    <form method="post" action="" class="w-100">
+    <form method="post" action="{{ route('login.post') }}" class="w-100">
         @csrf
         <div class="card mx-auto">
             <div class="card-body">
@@ -20,12 +20,6 @@
                 <div class="mb-3">
                     <label for="usuario" class="form-label fw-bold">Usuario</label>
                     <input type="text" name="usuario" id="usuario" class="form-control" value="{{ old('usuario') }}" required>
-
-                    @error('usuario')
-                    <div class="text-danger mt-1">
-                        {{ $message }}
-                    </div>
-                    @enderror
                 </div>
 
                 <div class="mb-3">
@@ -41,12 +35,6 @@
                             <i id="icono-ojo" class="fa-solid fa-eye-slash"></i>
                         </button>
                     </div>
-
-                    @error('password')
-                    <div class="text-danger mt-1">
-                        {{ $message }}
-                    </div>
-                    @enderror
                 </div>
 
                 <div class="d-grid">
