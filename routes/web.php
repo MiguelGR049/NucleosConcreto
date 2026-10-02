@@ -16,8 +16,10 @@ Route::post('/cerrar-sesion', [LoginController::class, 'cerrar_sesion'])->name('
 Route::get('/inicio', [HomeController::class, 'inicio'])->name('inicio');
 
 Route::get('/recepcion', [RecepcionController::class, 'crear'])->name('recepcion');
+Route::post('/recepcion', [RecepcionController::class, 'store'])->name('recepcion.store');
 
-Route::get('/capturas', [PropiedadesController::class, 'capturas'])->name('capturas');
+Route::get('/propiedades', [PropiedadesController::class, 'capturas'])->name('propiedades');
+Route::post('/propiedades', [PropiedadesController::class, 'guardar'])->name('propiedades.guardar');
 
 Route::get('/ensayo', [EnsayoController::class, 'ensayo'])->name('ensayo');
 

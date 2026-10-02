@@ -7,6 +7,8 @@ body {
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
+    height: 100vh;
+    overflow-x: hidden;
     font-family: 'Poppins', sans-serif;
     color: rgb(225, 92, 0);
 }
@@ -20,21 +22,14 @@ body {
     overflow-x: hidden;
 }
 
+/* Tarjeta base (ancho de login). Las pantallas más anchas
+   la sobrescriben con su propia clase: .card.recepcion-card, .card.propiedades-card */
 .card {
     background-color: rgb(255, 255, 255);
     width: 100%;
     max-width: 300px;
     margin: 0 auto;
     box-shadow: 0 15px 40px rgba(0, 0, 0, .2);
-}
-
-.recepcion-card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    max-width: 500px;   /* le damos su propio ancho, ya no hereda los 300px del login */
-    width: 100%;
-    margin: 0 auto;
 }
 
 #logo {
@@ -67,7 +62,7 @@ body {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    max-width: calc(100% - 100px);
+    max-width: calc(100% - 130px);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -82,6 +77,14 @@ body {
     text-decoration: none;
     display: flex;
     align-items: center;
+}
+
+.navbar-icon-img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    pointer-events: none;
+    /* por si acaso, bloquea cualquier clic/hover */
 }
 
 .back-arrow-btn:hover {
@@ -154,7 +157,8 @@ body {
 
     width: 200px;
     height: 100px;
-    flex: 0 0 auto; /* evita que se estiren/encojan en flexbox */
+    flex: 0 0 auto;
+    /* evita que se estiren/encojan en flexbox */
 
     border: 1px solid #dcdcdc;
     border-radius: 8px;
@@ -179,6 +183,7 @@ body {
 
 /* Ajuste responsive: botones más compactos en pantallas de celular */
 @media (max-width: 480px) {
+
     #recepcion,
     #propiedades,
     #ensayo,
@@ -196,6 +201,10 @@ body {
     border: none;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    max-width: 500px;
+    /* le damos su propio ancho, ya no hereda los 300px del login */
+    width: 100%;
+    margin: 0 auto;
 }
 
 .form-title {
@@ -257,4 +266,84 @@ body {
     border-color: rgb(225, 92, 0);
     color: rgb(225, 92, 0);
     font-weight: 600;
+}
+
+.elemento-hibrido-wrapper {
+    position: relative;
+}
+
+.elemento-hibrido-input {
+    padding-right: 2.2rem;
+}
+
+.elemento-hibrido-flecha {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+#paginacionPasos .page-link {
+    color: rgb(225, 92, 0);
+    cursor: pointer;
+}
+
+#paginacionPasos .page-link:focus {
+    box-shadow: 0 0 0 .2rem rgba(225, 92, 0, .25);
+}
+
+#paginacionPasos .page-item.active .page-link {
+    background-color: rgb(225, 92, 0);
+    border-color: rgb(225, 92, 0);
+    color: #fff;
+}
+
+#paginacionPasos .page-item.disabled .page-link {
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* ===========================
+   CAPTURA DE PROPIEDADES
+=========================== */
+/* Dos clases = más específico que .card, así sobrescribe el max-width de 300px */
+.card.propiedades-card {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    border: none;
+    border-radius: 1rem;
+}
+
+.propiedades-card h5 {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+}
+
+.propiedades-card .table {
+    font-size: clamp(.95rem, 2.2vw, 1.15rem);
+}
+
+.propiedades-card .table th,
+.propiedades-card .table td {
+    padding: .85rem .75rem;
+}
+
+.propiedades-card .form-check-input {
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+}
+
+.btn-captura {
+    background-color: rgb(225, 92, 0);
+    color: #fff;
+    font-weight: 600;
+}
+
+.btn-captura:hover {
+    background-color: rgb(195, 78, 0);
+    color: #fff;
 }

@@ -6,151 +6,359 @@
 @section('back-route', route('inicio'))
 
 @include('layouts.navbar')
+
+@php
+    // Campos de cada paso (para abrir el paso correcto si el servidor devuelve errores)
+    $camposPaso = [
+        1 => ['clave_obra', 'cliente', 'obra', 'atencion_a', 'numero_muestra', 'num_especimenes'],
+        2 => ['fecha_recepcion', 'elemento', 'localizacion', 'fecha_muestreo', 'datos_proyecto', 'defectos_especimen'],
+        3 => ['fechas_ensayo', 'fechas_ensayo.*', 'envia', 'recibe', 'observaciones'],
+    ];
+
+    $pasoInicial = 1;
+    if ($errors->any()) {
+        foreach ($camposPaso as $numPaso => $campos) {
+            foreach ($campos as $campo) {
+                if ($errors->has($campo)) {
+                    $pasoInicial = $numPaso;
+                    break 2;
+                }
+            }
+        }
+    }
+@endphp
+
 <div class="container mt-4 mb-5">
     <div class="card recepcion-card">
         <div class="card-body p-4">
 
-            <form action="#" method="POST" id="formRecepcion">
+            @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
+            @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+            @endif
+
+            <form action="{{ route('recepcion.store') }}" method="POST" id="formRecepcion">
                 @csrf
 
-                <div class="row g-3">
+                {{-- ================= PASO 1 ================= --}}
+                <div class="paso-form" data-paso="1">
+                    <div class="row g-3">
 
-                    <div class="col-12">
-                        <label class="form-label">Folio</label>
-                        <input type="text" class="form-control" value="{{ $folioGenerado }}" readonly>
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label">Clave de obra</label>
-                        <input type="text" name="localizacion" class="form-control" placeholder="Ej. OB-001">
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label">Cliente</label>
-                        <input type="text" name="localizacion" class="form-control" placeholder="Ej. Obra XYZ S.A. de C.V.">
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label">Obra</label>
-                        <input type="text" name="localizacion" class="form-control" placeholder="Ej. Edificio ABC">
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label">Antecion a:</label>
-                        <input type="text" name="localizacion" class="form-control" placeholder="Ej. Ing. Juan Pérez">
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label">Número de muestra</label>
-                        <input type="text" name="localizacion" class="form-control" placeholder="Ej. MUE-001">
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label">No. Especímenes</label>
-                        <select name="num_especimenes" class="form-select">
-                            <option value="" selected disabled>--</option>
-                            @for($i = 1; $i <= 5; $i++)
-                                <option value="{{ $i }}">{{ $i }}</option>
-                                @endfor
-                        </select>
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label">Fecha de recepción</label>
-                        <input type="date" name="fecha_recepcion" id="fecha_recepcion" class="form-control"
-                            value="{{ old('fecha_recepcion', date('Y-m-d')) }}">
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label">Elemento</label>
-                        <select name="elemento" class="form-select">
-                            <option value="" selected disabled>Seleccione...</option>
-                            @foreach($elementos as $elemento)
-                            <option value="{{ $elemento->id }}">{{ $elemento->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label">Localización</label>
-                        <input type="text" name="localizacion" class="form-control" placeholder="Ej. Eje 3, Nivel 2">
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label">Fecha de muestreo</label>
-                        <input type="date" name="fecha_muestreo" id="fecha_muestreo" class="form-control"
-                            value="{{ old('fecha_muestreo', date('Y-m-d')) }}">
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label">Datos de proyecto</label>
-                        <textarea name="datos_proyecto" class="form-control" rows="3"></textarea>
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label">Defectos del espécimen</label>
-                        <textarea name="defectos_especimen" class="form-control" rows="3"></textarea>
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label d-block">Fechas de ensayo</label>
-                        <div class="d-flex flex-column gap-2">
-                            @foreach([1, 3, 7, 14, 28] as $dia)
-                            <div class="ensayo-fila d-flex align-items-center justify-content-between">
-                                <div class="form-check d-flex align-items-center gap-2 mb-0">
-                                    <input class="form-check-input" type="checkbox" name="fechas_ensayo[]"
-                                        value="{{ $dia }}" id="ensayo{{ $dia }}" data-dias="{{ $dia }}">
-                                    <label class="form-check-label mb-0" for="ensayo{{ $dia }}">
-                                        {{ $dia }}
-                                    </label>
-                                </div>
-                                <span class="fecha-aproximada-box" id="fecha-ensayo-{{ $dia }}">--</span>
-                            </div>
-                            @endforeach
+                        <div class="col-12">
+                            <label class="form-label">Folio</label>
+                            <input type="text" class="form-control" value="{{ $folioGenerado }}" readonly>
                         </div>
-                    </div>
 
-                    <div class="col-12">
-                        <label class="form-label">Envía</label>
-                        <input type="text" name="envia" class="form-control" placeholder="Nombre de quien envía">
-                    </div>
+                        <div class="col-12">
+                            <label class="form-label">Clave de obra</label>
+                            <input type="text" name="clave_obra" class="form-control" placeholder="Ej. OB-001" value="{{ old('clave_obra') }}">
+                        </div>
 
-                    <div class="col-12">
-                        <label class="form-label">Recibe</label>
-                        <input type="text" name="recibe" class="form-control" placeholder="Nombre de quien recibe"
-                            value="{{ old('recibe', $nombreCompletoUsuario) }}">
-                    </div>
+                        <div class="col-12">
+                            <label class="form-label">Cliente</label>
+                            <input type="text" name="cliente" class="form-control" placeholder="Ej. Obra XYZ S.A. de C.V." value="{{ old('cliente') }}">
+                        </div>
 
-                    <div class="col-12">
-                        <label class="form-label">Observaciones</label>
-                        <textarea name="observaciones" class="form-control" rows="2"></textarea>
-                    </div>
+                        <div class="col-12">
+                            <label class="form-label">Obra</label>
+                            <input type="text" name="obra" class="form-control" placeholder="Ej. Edificio ABC" value="{{ old('obra') }}">
+                        </div>
 
-                    <div class="col-12">
-                        <label class="form-label text-muted">Usuario que registra</label>
-                        <input type="text" class="form-control" value="{{ $usuario->usuario ?? 'N/A' }}" disabled>
-                    </div>
+                        <div class="col-12">
+                            <label class="form-label">Atención a:</label>
+                            <input type="text" name="atencion_a" class="form-control" placeholder="Ej. Ing. Juan Pérez" value="{{ old('atencion_a') }}">
+                        </div>
 
-                    <div class="col-12">
-                        <label class="form-label text-muted">Fecha de registro</label>
-                        <input type="text" class="form-control" value="{{ date('d/m/Y') }}" disabled>
-                        <small class="text-muted">La hora exacta se guarda automáticamente al enviar el formulario.</small>
-                    </div>
+                        <div class="col-12">
+                            <label class="form-label">Número de muestra</label>
+                            <input type="text" name="numero_muestra" class="form-control" placeholder="Ej. MUE-001" value="{{ old('numero_muestra') }}">
+                        </div>
 
+                        <div class="col-12">
+                            <label class="form-label">No. Especímenes</label>
+                            <select name="num_especimenes" id="num_especimenes" class="form-select" required>
+                                <option value="" selected disabled>--</option>
+                                @for($i = 1; $i <= 5; $i++)
+                                <option value="{{ $i }}" {{ old('num_especimenes') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                @endfor
+                            </select>
+                        </div>
+
+                    </div>
                 </div>
 
-                <div class="text-center mt-4">
+                {{-- ================= PASO 2 ================= --}}
+                <div class="paso-form d-none" data-paso="2">
+                    <div class="row g-3">
+
+                        <div class="col-12">
+                            <label class="form-label">Fecha de recepción</label>
+                            <input type="date" name="fecha_recepcion" id="fecha_recepcion" class="form-control"
+                                value="{{ old('fecha_recepcion', date('Y-m-d')) }}">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Elemento</label>
+                            <select name="elemento_select" id="elemento_select" class="form-select">
+                                <option value="" selected disabled>Seleccione...</option>
+                                @foreach($elementos as $elemento)
+                                <option value="{{ $elemento->nombre }}">{{ $elemento->nombre }}</option>
+                                @endforeach
+                                <option value="__otro__">Otro (especificar)</option>
+                            </select>
+                            <input
+                                type="text"
+                                class="form-control mt-2 d-none"
+                                id="elemento_otro"
+                                name="elemento_otro"
+                                placeholder="Escribe el elemento"
+                                autocomplete="off">
+                            <input type="hidden" name="elemento" id="elemento" value="{{ old('elemento') }}">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Localización</label>
+                            <input type="text" name="localizacion" class="form-control" placeholder="Ej. Eje 3, Nivel 2" value="{{ old('localizacion') }}">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Fecha de muestreo</label>
+                            <input type="date" name="fecha_muestreo" id="fecha_muestreo" class="form-control"
+                                value="{{ old('fecha_muestreo', date('Y-m-d')) }}">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Datos de proyecto</label>
+                            <textarea name="datos_proyecto" class="form-control" rows="3">{{ old('datos_proyecto') }}</textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Defectos del espécimen</label>
+                            <textarea name="defectos_especimen" class="form-control" rows="3">{{ old('defectos_especimen') }}</textarea>
+                        </div>
+
+                    </div>
+                </div>
+
+                {{-- ================= PASO 3 ================= --}}
+                <div class="paso-form d-none" data-paso="3">
+                    <div class="row g-3">
+
+                        <div class="col-12">
+                            <label class="form-label d-block">Fechas de ensayo</label>
+                            <small class="text-muted d-block mb-2" id="limite-fechas-msg">Selecciona el número de especímenes primero.</small>
+                            <div class="d-flex flex-column gap-2">
+                                @foreach([1, 3, 7, 14, 28] as $dia)
+                                <div class="ensayo-fila d-flex align-items-center justify-content-between">
+                                    <div class="form-check d-flex align-items-center gap-2 mb-0">
+                                        <input class="form-check-input" type="checkbox" name="fechas_ensayo[]"
+                                            value="{{ $dia }}" id="ensayo{{ $dia }}" data-dias="{{ $dia }}"
+                                            {{ in_array($dia, old('fechas_ensayo', [])) ? 'checked' : '' }}>
+                                        <label class="form-check-label mb-0" for="ensayo{{ $dia }}">
+                                            {{ $dia }}
+                                        </label>
+                                    </div>
+                                    <span class="fecha-aproximada-box" id="fecha-ensayo-{{ $dia }}">--</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Envía</label>
+                            <input type="text" name="envia" class="form-control" placeholder="Nombre de quien envía" value="{{ old('envia') }}">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Recibe</label>
+                            <input type="text" name="recibe" class="form-control" placeholder="Nombre de quien recibe"
+                                value="{{ old('recibe', $nombreCompletoUsuario) }}">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Observaciones</label>
+                            <textarea name="observaciones" class="form-control" rows="2">{{ old('observaciones') }}</textarea>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 d-none" id="contenedorGuardar">
                     <button type="submit" class="btn btn-guardar">Guardar Recepción</button>
                 </div>
             </form>
+
+            <nav class="mt-2" aria-label="Pasos del registro">
+                <ul class="pagination justify-content-center" id="paginacionPasos">
+                    <li class="page-item" id="pagAnterior">
+                        <a class="page-link" role="button">Anterior</a>
+                    </li>
+                    <li class="page-item" data-ir-paso="1">
+                        <a class="page-link" role="button">1</a>
+                    </li>
+                    <li class="page-item" data-ir-paso="2">
+                        <a class="page-link" role="button">2</a>
+                    </li>
+                    <li class="page-item" data-ir-paso="3">
+                        <a class="page-link" role="button">3</a>
+                    </li>
+                    <li class="page-item" id="pagSiguiente">
+                        <a class="page-link" role="button">Siguiente</a>
+                    </li>
+                </ul>
+            </nav>
+
         </div>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+        /* ===================== PASOS ===================== */
+        const form = document.getElementById('formRecepcion');
+        const pasos = document.querySelectorAll('.paso-form');
+        const itemsPaso = document.querySelectorAll('[data-ir-paso]');
+        const pagAnterior = document.getElementById('pagAnterior');
+        const pagSiguiente = document.getElementById('pagSiguiente');
+        const contenedorGuardar = document.getElementById('contenedorGuardar');
+        const totalPasos = pasos.length;
+        let pasoActual = {{ $pasoInicial }};
+
+        function mostrarPaso(n) {
+            pasoActual = n;
+
+            pasos.forEach(function(p) {
+                p.classList.toggle('d-none', parseInt(p.dataset.paso, 10) !== n);
+            });
+
+            itemsPaso.forEach(function(item) {
+                const activo = parseInt(item.dataset.irPaso, 10) === n;
+                item.classList.toggle('active', activo);
+                const link = item.querySelector('.page-link');
+                if (activo) {
+                    link.setAttribute('aria-current', 'page');
+                } else {
+                    link.removeAttribute('aria-current');
+                }
+            });
+
+            pagAnterior.classList.toggle('disabled', n === 1);
+            pagSiguiente.classList.toggle('disabled', n === totalPasos);
+            contenedorGuardar.classList.toggle('d-none', n !== totalPasos);
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function pasoValido(n) {
+            const paso = document.querySelector('.paso-form[data-paso="' + n + '"]');
+            const campos = paso.querySelectorAll('input, select, textarea');
+            for (const campo of campos) {
+                if (!campo.checkValidity()) {
+                    // Si el campo inválido está en otro paso, primero lo mostramos
+                    if (pasoActual !== n) mostrarPaso(n);
+                    campo.reportValidity();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Ir a un paso: hacia atrás siempre libre; hacia adelante valida los pasos intermedios
+        function irAPaso(destino) {
+            if (destino < 1 || destino > totalPasos || destino === pasoActual) return;
+
+            if (destino > pasoActual) {
+                for (let n = pasoActual; n < destino; n++) {
+                    if (!pasoValido(n)) return;
+                }
+            }
+            mostrarPaso(destino);
+        }
+
+        itemsPaso.forEach(function(item) {
+            item.querySelector('.page-link').addEventListener('click', function() {
+                irAPaso(parseInt(item.dataset.irPaso, 10));
+            });
+        });
+
+        pagAnterior.querySelector('.page-link').addEventListener('click', function() {
+            irAPaso(pasoActual - 1);
+        });
+
+        pagSiguiente.querySelector('.page-link').addEventListener('click', function() {
+            irAPaso(pasoActual + 1);
+        });
+
+        // Evita que Enter envíe el formulario antes del último paso
+        form.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && pasoActual < totalPasos) {
+                e.preventDefault();
+                irAPaso(pasoActual + 1);
+            }
+        });
+
+        /* ===================== ELEMENTO ===================== */
+        const select = document.getElementById('elemento_select');
+        const otroInput = document.getElementById('elemento_otro');
+        const hiddenInput = document.getElementById('elemento');
+
+        function sincronizarElemento() {
+            if (select.value === '__otro__') {
+                otroInput.classList.remove('d-none');
+                hiddenInput.value = otroInput.value;
+            } else {
+                otroInput.classList.add('d-none');
+                hiddenInput.value = select.value;
+            }
+        }
+
+        select.addEventListener('change', function() {
+            sincronizarElemento();
+            if (select.value === '__otro__') {
+                otroInput.focus();
+            }
+        });
+
+        otroInput.addEventListener('input', function() {
+            otroInput.value = otroInput.value.toUpperCase();
+            hiddenInput.value = otroInput.value;
+        });
+
+        // Restaurar el elemento si el servidor devolvió el formulario con errores
+        (function restaurarElemento() {
+            const valorPrevio = hiddenInput.value;
+            if (!valorPrevio) return;
+
+            const existe = Array.from(select.options).some(function(op) {
+                return op.value === valorPrevio && op.value !== '__otro__';
+            });
+
+            if (existe) {
+                select.value = valorPrevio;
+            } else {
+                select.value = '__otro__';
+                otroInput.value = valorPrevio;
+            }
+            sincronizarElemento();
+        })();
+
+        /* ===================== FECHAS DE ENSAYO ===================== */
         const inputMuestreo = document.getElementById('fecha_muestreo');
         const checks = document.querySelectorAll('#formRecepcion input[name="fechas_ensayo[]"]');
+        const selectEspecimenes = document.getElementById('num_especimenes');
+        const limiteFechasMsg = document.getElementById('limite-fechas-msg');
 
         function formatearFecha(date) {
             const dia = String(date.getDate()).padStart(2, '0');
@@ -181,14 +389,51 @@
             });
         }
 
+        function aplicarLimiteFechas() {
+            const limite = parseInt(selectEspecimenes.value, 10) || 0;
+            const marcados = Array.from(checks).filter(c => c.checked).length;
+
+            if (limite === 0) {
+                limiteFechasMsg.textContent = 'Selecciona el número de especímenes primero.';
+            } else {
+                limiteFechasMsg.textContent = `Puedes seleccionar hasta ${limite} fecha(s) de ensayo (según tus especímenes).`;
+            }
+
+            checks.forEach(function(check) {
+                if (!check.checked) {
+                    check.disabled = limite === 0 || marcados >= limite;
+                } else {
+                    check.disabled = false; // los ya marcados siempre se pueden desmarcar
+                }
+            });
+        }
+
         checks.forEach(function(check) {
             check.addEventListener('change', actualizarFechasEnsayo);
+            check.addEventListener('change', aplicarLimiteFechas);
         });
 
         inputMuestreo.addEventListener('change', actualizarFechasEnsayo);
+        selectEspecimenes.addEventListener('change', function() {
+            // Si baja el número de especímenes, desmarca los checks sobrantes
+            const limite = parseInt(selectEspecimenes.value, 10) || 0;
+            let marcados = 0;
+            checks.forEach(function(check) {
+                if (check.checked) {
+                    marcados++;
+                    if (marcados > limite) check.checked = false;
+                }
+            });
+            actualizarFechasEnsayo();
+            aplicarLimiteFechas();
+        });
 
-        // Por si el navegador recuerda checks marcados al recargar la página
+        // Estado inicial (por si el navegador o old() dejó valores)
         actualizarFechasEnsayo();
+        aplicarLimiteFechas();
+
+        // Mostrar el paso inicial (el 1, o el que tenga errores del servidor)
+        mostrarPaso(pasoActual);
     });
 </script>
 @endsection

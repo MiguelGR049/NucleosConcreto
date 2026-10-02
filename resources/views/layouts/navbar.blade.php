@@ -6,6 +6,8 @@
             <a href="@yield('back-route')" class="back-arrow-btn">
                 <i class="bi bi-arrow-left"></i>
             </a>
+            @elseif(View::hasSection('navbar-icon'))
+            <img src="@yield('navbar-icon')" class="navbar-icon-img" alt="">
             @endif
         </div>
 

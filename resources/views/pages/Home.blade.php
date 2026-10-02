@@ -2,7 +2,9 @@
 
 @section('contenido')
 
+@section('navbar-icon', asset('img/logo.jpeg'))
 @section('navbar-title', 'Ensayos a compresión de núcleos')
+
 @include('layouts.navbar')
 
 <div class="container d-flex flex-column justify-content-center align-items-center">
@@ -12,7 +14,7 @@
             <i class="fa-solid fa-circle-down mb-1"></i>
             Recepción
         </a>
-        <a href="{{ route('capturas') }}" id="propiedades" class="btn d-flex flex-column justify-content-center align-items-center text-decoration-none">
+        <a href="{{ route('propiedades') }}" id="propiedades" class="btn d-flex flex-column justify-content-center align-items-center text-decoration-none">
             <i class="fa-solid fa-list mb-1"></i>
             Propiedades de ensayo
         </a>
