@@ -50,6 +50,10 @@ class RecepcionController extends Controller
 
         $validated = $request->validate([
             'clave_obra' => 'required|string|max:50',
+            'cliente' => 'nullable|string|max:100',
+            'obra' => 'nullable|string|max:100',
+            'atencion_a' => 'nullable|string|max:100',
+            'numero_muestra' => 'nullable|string|max:50',
             'fecha_recepcion' => 'required|date',
             'num_especimenes' => 'required|integer|min:1|max:5',
             'elemento' => 'required|string|max:100',
@@ -95,6 +99,10 @@ class RecepcionController extends Controller
                 $recepcion = Recepcion::create([
                     'folio' => $folio,
                     'clave_obra' => $validated['clave_obra'],
+                    'cliente' => $validated['cliente'] ?? null,
+                    'obra' => $validated['obra'] ?? null,
+                    'atencion_a' => $validated['atencion_a'] ?? null,
+                    'numero_muestra' => $validated['numero_muestra'] ?? null,
                     'fecha_rec' => $validated['fecha_recepcion'],
                     'n_espec' => $validated['num_especimenes'],
                     'elemento' => $validated['elemento'], // el mutator lo pasa a mayúsculas
@@ -115,8 +123,10 @@ class RecepcionController extends Controller
                 foreach ($fechasCalculadas as $f) {
                     FechaEnsayo::create([
                         'recepcion_id' => $recepcion->id_seg,
-                        'dia' => $f['dia'],
+                        'dia'          => $f['dia'],
                         'fecha_ensayo' => $f['fecha_ensayo'],
+                        'capturada'    => false,  // nueva muestra: pendiente de captura
+                        'ensayada'     => false,   // nueva muestra: pendiente de ensayar
                     ]);
                 }
 
@@ -138,7 +148,7 @@ class RecepcionController extends Controller
      */
     private function generarFolio(): string
     {
-        $meses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+        $meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
 
         $ahora  = Carbon::now();
         $sufijo = $ahora->format('y') . $meses[$ahora->month - 1]; // ej. 26OCT

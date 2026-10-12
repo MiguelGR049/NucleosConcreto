@@ -12,7 +12,7 @@ class Recepcion extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'folio', 'clave_obra', 'fecha_rec', 'n_espec', 'elemento',
+        'folio', 'clave_obra', 'cliente', 'obra', 'atencion_a', 'numero_muestra', 'fecha_rec', 'n_espec', 'elemento',
         'localizacion', 'datos_proy', 'defectos', 'envia', 'recibe',
         'fecha_muest', 'observ', 'usuario_reg_id', 'fecha_reg',
     ];

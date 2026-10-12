@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreign('recepcion_id')->references('id_seg')->on('recepciones')->onDelete('cascade');
             $table->unsignedTinyInteger('dia'); // 1, 3, 7, 14 o 28
             $table->date('fecha_ensayo');
+            $table->boolean('capturada')->default(false);
+            $table->boolean('ensayada')->default(false);
             $table->timestamps();
         });
     }

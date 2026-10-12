@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ asset('img/logo.jpeg') }}" type="image/x-icon">
     <title>{{$titulo}}</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -16,15 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
 </head>
 
-<body class="
-@if(request()->routeIs('login1'))
-    login1-bg
-@elseif(request()->routeIs('login2'))
-    login2-bg
-@elseif(request()->routeIs('dashboard'))
-    dashboard-bg
-@endif
-">
+<body>
     <section class="v-100">
         @yield('contenido')
     </section>

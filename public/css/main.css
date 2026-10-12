@@ -347,3 +347,28 @@ body {
     background-color: rgb(195, 78, 0);
     color: #fff;
 }
+
+/* Arreglo del scroll: el <form> queda entre .modal-content y .modal-body,
+   así que tiene que participar del flex para que el cuerpo pueda desplazarse */
+.hoja-modal .modal-content>form {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* Botones Agregar / Quitar núcleo */
+.btn-nucleo {
+    border-color: rgb(225, 92, 0);
+    color: rgb(225, 92, 0);
+    background-color: #fff;
+}
+
+.btn-nucleo:hover:not(:disabled) {
+    background-color: rgb(225, 92, 0);
+    color: #fff;
+}
+
+.btn-nucleo:disabled {
+    opacity: .45;
+}

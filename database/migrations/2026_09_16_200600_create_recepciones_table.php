@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id('id_seg');
             $table->string('folio')->unique();
             $table->string('clave_obra');
+            $table->string('cliente')->nullable();
+            $table->string('obra')->nullable();
+            $table->string('atencion_a')->nullable();
+            $table->string('numero_muestra', 100)->nullable();
             $table->date('fecha_rec');
             $table->unsignedTinyInteger('n_espec');
             $table->string('elemento'); // guardamos el nombre en mayúsculas, no FK
