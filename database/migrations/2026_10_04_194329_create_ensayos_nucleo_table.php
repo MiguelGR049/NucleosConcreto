@@ -42,8 +42,8 @@ return new class extends Migration
             $table->decimal('altura_2_sin_cabeceo_mm', 9, 4);
             $table->decimal('altura_1_con_cabeceo_mm', 9, 4);
             $table->decimal('altura_2_con_cabeceo_mm', 9, 4);
-            $table->decimal('carga_kn', 10, 4);
-            $table->string('tipo_falla', 50);
+            $table->decimal('carga_kn', 10, 4)->nullable();  //se puso nullable para que acepte null
+            $table->string('tipo_falla', 50)->nullable();  //se puso nullable para que acepte null
 
             $table->timestamps();
 

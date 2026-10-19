@@ -22,5 +22,6 @@ Route::get('/propiedades', [PropiedadesController::class, 'capturas'])->name('pr
 Route::post('/propiedades', [PropiedadesController::class, 'guardar'])->name('propiedades.guardar');
 
 Route::get('/ensayo', [EnsayoController::class, 'ensayo'])->name('ensayo');
+Route::post('/ensayo', [EnsayoController::class, 'guardar'])->name('ensayo.guardar');
 
 Route::get('/consulta', [ConsultaController::class, 'consulta'])->name('consulta');

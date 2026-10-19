@@ -61,8 +61,7 @@ class PropiedadesController extends Controller
             ->header('Expires', 'Sat, 01 Jan 1990 00:00:00 GMT');
     }
 
-    public function guardar(Request $request)
-    {
+    public function guardar(Request $request){
         if (!session()->has('sesionUsuario')) {
             return redirect()->route('login');
         }
@@ -82,8 +81,8 @@ class PropiedadesController extends Controller
             'nucleos.*.altura_2_sin_cabeceo_mm' => 'required|numeric|gt:0|max:99999.99',
             'nucleos.*.altura_1_con_cabeceo_mm' => 'required|numeric|gt:0|max:99999.99',
             'nucleos.*.altura_2_con_cabeceo_mm' => 'required|numeric|gt:0|max:99999.99',
-            'nucleos.*.carga_kn'   => 'required|numeric|gt:0|max:999999.99',
-            'nucleos.*.tipo_falla' => 'required|string|max:50',
+            'nucleos.*.carga_kn'   => 'nullable|numeric|gt:0|max:999999.99',
+            'nucleos.*.tipo_falla' => 'nullable|string|max:50',
         ]);
 
         $fechaEnsayo = FechaEnsayo::findOrFail($datos['fecha_ensayo_id']);
@@ -112,12 +111,15 @@ class PropiedadesController extends Controller
                 'resistencia_proyecto' => $datos['resistencia_proyecto'] ?? null,
                 'usuario_captura_id'   => session('sesionUsuario'),
             ]);
-
+//
             foreach ($nucleos as $i => $n) {
-                EnsayoNucleo::create($n + [
-                    'hoja_id' => $hoja->id_seg,
-                    'columna' => $i + 1,
-                ]);
+                $n['carga_kn'] = null;
+                    $n['tipo_falla'] = null;
+
+                    EnsayoNucleo::create($n + [
+                        'hoja_id' => $hoja->id_seg,
+                        'columna' => $i + 1,
+                    ]);
             }
 
             $fechaEnsayo->update(['capturada' => 1]);

@@ -202,7 +202,10 @@
                                 <tr>
                                     <th scope="row" class="hoja-label">{{ $f['l'] }}</th>
                                     @for ($c = 0; $c < 4; $c++)
-                                    <td class="hoja-celda {{ $f['t'] === 'calc' ? 'celda-calc' : '' }} d-none" data-col="{{ $c }}">
+                                    <td class="hoja-celda {{ $f['t'] === 'calc' ? 'celda-calc' : '' }} d-none"
+                                        data-col="{{ $c }}"
+                                        data-campo="{{ $f['k'] }}"
+                                    >
                                         @if ($f['t'] === 'info')
                                             <span data-info="{{ $f['k'] }}">—</span>
                                         @elseif ($f['t'] === 'calc')
@@ -389,6 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
         bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
 
+    
     /* ---------- Columnas (núcleos) ---------- */
     function activarColumnas(n) {
         nColumnas = n;
@@ -398,10 +402,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
             document.querySelectorAll('#tabla-hoja [data-col="' + c + '"]').forEach(function (td) {
                 td.classList.toggle('d-none', !activa);
+
                 td.querySelectorAll('input').forEach(function (i) {
+                    const campo = td.dataset.campo;
+
+                    // Carga kN: bloquear el campo visible.
+                    // El campo oculto permanece habilitado y vacío.
+                    if (campo === 'carga_kn') {
+                        i.disabled = i.type !== 'hidden' || !activa;
+                        i.required = false;
+                        i.value = '';
+                        return;
+                    }
+
+                    // Tipo de falla: se captura después en Ensayo.
+                    if (campo === 'tipo_falla') {
+                        i.disabled = true;
+                        i.required = false;
+                        i.value = '';
+                        return;
+                    }
+
+                    // Los demás campos siguen siendo obligatorios.
                     i.disabled = !activa;
                     i.required = activa;
-                    if (!activa) i.value = '';
+
+                    if (!activa) {
+                        i.value = '';
+                    }
                 });
             });
 
@@ -409,9 +437,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         contador.textContent = 'Núcleos: ' + n + ' de ' + maxPermitido;
-        btnAgregar.disabled  = n >= maxPermitido;
-        btnQuitar.disabled   = n <= 1;
+        btnAgregar.disabled = n >= maxPermitido;
+        btnQuitar.disabled = n <= 1;
     }
+
 
     btnAgregar.addEventListener('click', function () {
         if (nColumnas >= maxPermitido) return;
