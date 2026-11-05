@@ -16,11 +16,14 @@ Route::post('/cerrar-sesion', [LoginController::class, 'cerrar_sesion'])->name('
 Route::get('/inicio', [HomeController::class, 'inicio'])->name('inicio');
 
 Route::get('/recepcion', [RecepcionController::class, 'crear'])->name('recepcion');
+Route::get('/recepcion/obra', [RecepcionController::class, 'buscarObra'])->name('recepcion.obra');
 Route::post('/recepcion', [RecepcionController::class, 'store'])->name('recepcion.store');
 
 Route::get('/propiedades', [PropiedadesController::class, 'capturas'])->name('propiedades');
 Route::post('/propiedades', [PropiedadesController::class, 'guardar'])->name('propiedades.guardar');
 
 Route::get('/ensayo', [EnsayoController::class, 'ensayo'])->name('ensayo');
+Route::post('/ensayo', [EnsayoController::class, 'guardar'])->name('ensayo.guardar');
 
 Route::get('/consulta', [ConsultaController::class, 'consulta'])->name('consulta');
+Route::post('/consulta/pdf', [ConsultaController::class, 'pdf'])->name('consulta.pdf');

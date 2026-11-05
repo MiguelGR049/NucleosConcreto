@@ -28,26 +28,37 @@ return new class extends Migration
         Schema::create('ensayos_nucleo', function (Blueprint $table) {
             $table->id('id_seg');
 
-            $table->foreignId('hoja_id')
-                ->constrained('hojas_ensayo', 'id_seg')
+            // NUEVO: el núcleo nace en la recepción
+            $table->foreignId('recepcion_id')
+                ->constrained('recepciones', 'id_seg')
                 ->cascadeOnDelete();
 
-            $table->unsignedTinyInteger('columna');   // 1 a 4
-            $table->string('no_nucleo', 20);
+            // CAMBIO: nullable hasta que se asigne a una hoja (captura de propiedades)
+            $table->foreignId('hoja_id')
+                ->nullable()
+                ->constrained('hojas_ensayo', 'id_seg')
+                ->nullOnDelete();
 
-            $table->decimal('masa_g', 12, 4);
-            $table->decimal('diametro_1_mm', 8, 4);
-            $table->decimal('diametro_2_mm', 8, 4);
-            $table->decimal('altura_1_sin_cabeceo_mm', 9, 4);
-            $table->decimal('altura_2_sin_cabeceo_mm', 9, 4);
-            $table->decimal('altura_1_con_cabeceo_mm', 9, 4);
-            $table->decimal('altura_2_con_cabeceo_mm', 9, 4);
-            $table->decimal('carga_kn', 10, 4);
-            $table->string('tipo_falla', 50);
+            $table->unsignedTinyInteger('columna')->nullable();   // CAMBIO: nullable
+            $table->string('no_nucleo', 20);
+            $table->string('elemento', 100);
+            $table->decimal('espesor', 8, 2)->nullable();
+            $table->string('localizacion', 150);
+
+            // CAMBIO: todas las mediciones nullable (se llenan en la captura)
+            $table->decimal('masa_g', 12, 4)->nullable();
+            $table->decimal('diametro_1_mm', 8, 4)->nullable();
+            $table->decimal('diametro_2_mm', 8, 4)->nullable();
+            $table->decimal('altura_1_sin_cabeceo_mm', 9, 4)->nullable();
+            $table->decimal('altura_2_sin_cabeceo_mm', 9, 4)->nullable();
+            $table->decimal('altura_1_con_cabeceo_mm', 9, 4)->nullable();
+            $table->decimal('altura_2_con_cabeceo_mm', 9, 4)->nullable();
+            $table->decimal('carga_kn', 10, 4)->nullable();
+            $table->string('tipo_falla', 50)->nullable();
 
             $table->timestamps();
 
-            $table->unique(['hoja_id', 'columna']);
+            $table->unique(['hoja_id', 'columna']);  // los NULL no chocan entre sí
         });
     }
 

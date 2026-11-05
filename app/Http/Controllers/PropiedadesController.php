@@ -6,11 +6,22 @@ use App\Models\EnsayoNucleo;
 use App\Models\FechaEnsayo;
 use App\Models\HojaEnsayo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class PropiedadesController extends Controller
 {
     private const MAX_COLUMNAS = 4;   // columnas que tiene la hoja
+
+    private const CAMPOS_MEDICION = [
+        'masa_g',
+        'diametro_1_mm',
+        'diametro_2_mm',
+        'altura_1_sin_cabeceo_mm',
+        'altura_2_sin_cabeceo_mm',
+        'altura_1_con_cabeceo_mm',
+        'altura_2_con_cabeceo_mm',
+    ];
 
     public function capturas(Request $request)
     {
@@ -31,8 +42,6 @@ class PropiedadesController extends Controller
                 'r.folio',
                 'r.clave_obra',
                 'r.obra',
-                'r.elemento',
-                'r.localizacion',
                 'r.datos_proy',
                 'r.fecha_muest as muestreo',
                 'r.observ as observaciones'
@@ -42,11 +51,12 @@ class PropiedadesController extends Controller
             ->orderBy('r.folio')
             ->get();
 
-        // Cuántos núcleos se pueden capturar en cada fecha
+        // Cuántos núcleos se pueden capturar en cada fecha y cuáles están pendientes
         $muestras->each(function ($m) {
             $cap = $this->capacidad($m->recepcion_id);
             $m->restantes   = $cap['restantes'];
             $m->pendientes  = $cap['pendientes'];
+            $m->nucleos     = $cap['nucleos'];
             $m->max_nucleos = $m->capturada ? 0 : $cap['max'];
         });
 
@@ -73,17 +83,15 @@ class PropiedadesController extends Controller
             'tmn'                  => 'nullable|numeric|min:0|max:999.99',
             'resistencia_proyecto' => 'nullable|numeric|min:0|max:99999.99',
 
-            'nucleos'              => 'required|array|min:1|max:' . self::MAX_COLUMNAS,
-            'nucleos.*.no_nucleo'  => 'required|string|max:20',
-            'nucleos.*.masa_g'     => 'required|numeric|gt:0|max:99999999.99',
+            'nucleos'                 => 'required|array|min:1|max:' . self::MAX_COLUMNAS,
+            'nucleos.*.id_nucleo'     => 'required|integer|distinct|exists:ensayos_nucleo,id_seg',
+            'nucleos.*.masa_g'        => 'required|numeric|gt:0|max:99999999.99',
             'nucleos.*.diametro_1_mm' => 'required|numeric|gt:0|max:9999.99',
             'nucleos.*.diametro_2_mm' => 'required|numeric|gt:0|max:9999.99',
             'nucleos.*.altura_1_sin_cabeceo_mm' => 'required|numeric|gt:0|max:99999.99',
             'nucleos.*.altura_2_sin_cabeceo_mm' => 'required|numeric|gt:0|max:99999.99',
             'nucleos.*.altura_1_con_cabeceo_mm' => 'required|numeric|gt:0|max:99999.99',
             'nucleos.*.altura_2_con_cabeceo_mm' => 'required|numeric|gt:0|max:99999.99',
-            'nucleos.*.carga_kn'   => 'required|numeric|gt:0|max:999999.99',
-            'nucleos.*.tipo_falla' => 'required|string|max:50',
         ]);
 
         $fechaEnsayo = FechaEnsayo::findOrFail($datos['fecha_ensayo_id']);
@@ -95,8 +103,8 @@ class PropiedadesController extends Controller
         }
 
         // Regla: cada fecha pendiente necesita al menos 1 núcleo
-        $nucleos  = array_values($datos['nucleos']);
-        $cap      = $this->capacidad($fechaEnsayo->recepcion_id);
+        $nucleos = array_values($datos['nucleos']);
+        $cap     = $this->capacidad($fechaEnsayo->recepcion_id);
 
         if (count($nucleos) > $cap['max']) {
             return back()->withInput()->withErrors([
@@ -105,23 +113,35 @@ class PropiedadesController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($datos, $nucleos, $fechaEnsayo) {
-            $hoja = HojaEnsayo::create([
-                'fecha_ensayo_id'      => $fechaEnsayo->id_seg,
-                'tmn'                  => $datos['tmn'] ?? null,
-                'resistencia_proyecto' => $datos['resistencia_proyecto'] ?? null,
-                'usuario_captura_id'   => session('sesionUsuario'),
-            ]);
-
-            foreach ($nucleos as $i => $n) {
-                EnsayoNucleo::create($n + [
-                    'hoja_id' => $hoja->id_seg,
-                    'columna' => $i + 1,
+        try {
+            DB::transaction(function () use ($datos, $nucleos, $fechaEnsayo) {
+                $hoja = HojaEnsayo::create([
+                    'fecha_ensayo_id'      => $fechaEnsayo->id_seg,
+                    'tmn'                  => $datos['tmn'] ?? null,
+                    'resistencia_proyecto' => $datos['resistencia_proyecto'] ?? null,
+                    'usuario_captura_id'   => session('sesionUsuario'),
                 ]);
-            }
 
-            $fechaEnsayo->update(['capturada' => 1]);
-        });
+                foreach ($nucleos as $i => $n) {
+                    // Solo se puede usar un núcleo de ESTA recepción que siga pendiente
+                    $afectadas = EnsayoNucleo::where('id_seg', $n['id_nucleo'])
+                        ->where('recepcion_id', $fechaEnsayo->recepcion_id)
+                        ->whereNull('hoja_id')
+                        ->update(Arr::only($n, self::CAMPOS_MEDICION) + [
+                            'hoja_id' => $hoja->id_seg,
+                            'columna' => $i + 1,
+                        ]);
+
+                    if ($afectadas !== 1) {
+                        throw new \RuntimeException('Uno de los núcleos no pertenece a esta recepción o ya fue capturado.');
+                    }
+                }
+
+                $fechaEnsayo->update(['capturada' => 1]);
+            });
+        } catch (\RuntimeException $e) {
+            return back()->withInput()->withErrors(['nucleos' => $e->getMessage()]);
+        }
 
         return redirect()
             ->route('propiedades', ['fecha' => $datos['fecha']])
@@ -130,31 +150,29 @@ class PropiedadesController extends Controller
 
     /**
      * Cuántos núcleos se pueden capturar ahora en una fecha de la recepción.
-     * max = especímenes restantes - (fechas pendientes - 1), acotado a 0..4,
+     * Los núcleos pendientes son los que aún no tienen hoja (hoja_id null).
+     * max = restantes - (fechas pendientes - 1), acotado a 0..4,
      * porque cada una de las demás fechas pendientes necesita al menos 1.
      */
     private function capacidad(int $recepcionId): array
     {
-        $especimenes = (int) DB::table('recepciones')
-            ->where('id_seg', $recepcionId)
-            ->value('n_espec');
-
-        $capturados = DB::table('ensayos_nucleo as n')
-            ->join('hojas_ensayo as h', 'h.id_seg', '=', 'n.hoja_id')
-            ->join('fechas_ensayo as f', 'f.id_seg', '=', 'h.fecha_ensayo_id')
-            ->where('f.recepcion_id', $recepcionId)
-            ->count();
+        $nucleos = DB::table('ensayos_nucleo')
+            ->where('recepcion_id', $recepcionId)
+            ->whereNull('hoja_id')
+            ->orderBy('id_seg')
+            ->get(['id_seg', 'no_nucleo', 'elemento', 'espesor', 'localizacion']);
 
         $pendientes = DB::table('fechas_ensayo')
             ->where('recepcion_id', $recepcionId)
             ->where('capturada', 0)
             ->count();
 
-        $restantes = $especimenes - $capturados;
+        $restantes = $nucleos->count();
 
         return [
             'restantes'  => $restantes,
             'pendientes' => $pendientes,
+            'nucleos'    => $nucleos,
             'max'        => max(0, min(self::MAX_COLUMNAS, $restantes - max(0, $pendientes - 1))),
         ];
     }

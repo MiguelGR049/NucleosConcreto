@@ -18,16 +18,15 @@ return new class extends Migration
             $table->string('cliente')->nullable();
             $table->string('obra')->nullable();
             $table->string('atencion_a')->nullable();
-            $table->string('numero_muestra', 100)->nullable();
+            $table->string('n_informe', 100)->nullable();
             $table->date('fecha_rec');
             $table->unsignedTinyInteger('n_espec');
-            $table->string('elemento'); // guardamos el nombre en mayúsculas, no FK
-            $table->string('localizacion');
             $table->string('datos_proy')->nullable();
             $table->string('defectos')->nullable();
             $table->string('envia')->nullable();
             $table->string('recibe')->nullable();
             $table->date('fecha_muest');
+            $table->date('fecha_colado')->nullable();
             $table->string('observ')->nullable();
             $table->unsignedBigInteger('usuario_reg_id');
             $table->foreign('usuario_reg_id')->references('id')->on('usuarios');

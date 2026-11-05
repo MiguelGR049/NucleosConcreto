@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class EnsayoNucleo extends Model
 {
@@ -10,9 +11,13 @@ class EnsayoNucleo extends Model
     protected $primaryKey = 'id_seg';
 
     protected $fillable = [
+        'recepcion_id',
         'hoja_id',
         'columna',
         'no_nucleo',
+        'elemento',
+        'espesor',
+        'localizacion',
         'masa_g',
         'diametro_1_mm',
         'diametro_2_mm',
@@ -23,6 +28,16 @@ class EnsayoNucleo extends Model
         'carga_kn',
         'tipo_falla',
     ];
+
+    protected function elemento(): Attribute
+    {
+        return Attribute::make(set: fn(string $value) => strtoupper(trim($value)));
+    }
+
+    public function recepcion()
+    {
+        return $this->belongsTo(Recepcion::class, 'recepcion_id', 'id_seg');
+    }
 
     public function hoja()
     {

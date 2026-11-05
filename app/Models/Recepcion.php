@@ -12,16 +12,28 @@ class Recepcion extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'folio', 'clave_obra', 'cliente', 'obra', 'atencion_a', 'numero_muestra', 'fecha_rec', 'n_espec', 'elemento',
-        'localizacion', 'datos_proy', 'defectos', 'envia', 'recibe',
-        'fecha_muest', 'observ', 'usuario_reg_id', 'fecha_reg',
+        'folio',
+        'clave_obra',
+        'cliente',
+        'obra',
+        'atencion_a',
+        'n_informe',
+        'fecha_rec',
+        'n_espec',
+        'datos_proy',
+        'defectos',
+        'envia',
+        'recibe',
+        'fecha_muest',
+        'fecha_colado',
+        'observ',
+        'usuario_reg_id',
+        'fecha_reg',
     ];
 
-    protected function elemento(): Attribute
+    public function ensayosNucleos()
     {
-        return Attribute::make(
-            set: fn (string $value) => strtoupper(trim($value)),
-        );
+        return $this->hasMany(EnsayoNucleo::class, 'recepcion_id', 'id_seg');
     }
 
     public function fechasEnsayo()

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Elemento;
 use App\Models\Recepcion;
+use App\Models\EnsayoNucleo;
+use App\Models\ListadoObra;
 use App\Models\FechaEnsayo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -42,6 +44,30 @@ class RecepcionController extends Controller
             ->header('Expires', 'Sat, 01 Jan 1990 00:00:00 GMT');
     }
 
+    public function buscarObra(Request $request)
+    {
+        if (!session()->has('sesionUsuario')) {
+            return response()->json(['encontrada' => false], 401);
+        }
+
+        $clave = trim($request->query('clave', ''));
+
+        $obra = $clave !== ''
+            ? ListadoObra::where('CLAVE_OBRA', $clave)->first()
+            : null;
+
+        if (!$obra) {
+            return response()->json(['encontrada' => false]);
+        }
+
+        return response()->json([
+            'encontrada' => true,
+            'cliente'    => $obra->EMPRESA,
+            'obra'       => $obra->NOMBRE_OBRA,
+            'atencion_a' => $obra->CON_ATENCION,
+        ]);
+    }
+
     public function store(Request $request)
     {
         if (!session()->has('sesionUsuario')) {
@@ -53,12 +79,16 @@ class RecepcionController extends Controller
             'cliente' => 'nullable|string|max:100',
             'obra' => 'nullable|string|max:100',
             'atencion_a' => 'nullable|string|max:100',
-            'numero_muestra' => 'nullable|string|max:50',
+            'numero_informe' => 'nullable|string|max:50',
             'fecha_recepcion' => 'required|date',
             'num_especimenes' => 'required|integer|min:1|max:5',
-            'elemento' => 'required|string|max:100',
-            'localizacion' => 'required|string|max:150',
+            'especimenes' => 'required|array|min:1|max:5',
+            'especimenes.*.numero_muestra' => 'required|string|max:50',
+            'especimenes.*.elemento'       => 'required|string|max:100',
+            'especimenes.*.espesor'        => 'required|numeric|min:0|max:999999.99',
+            'especimenes.*.localizacion'   => 'required|string|max:150',
             'fecha_muestreo' => 'required|date',
+            'fecha_colado' => 'nullable|date',
             'datos_proyecto' => 'nullable|string',
             'defectos_especimen' => 'nullable|string',
             'fechas_ensayo' => 'nullable|array',
@@ -75,20 +105,18 @@ class RecepcionController extends Controller
             ]);
         }
 
+        if (count($validated['especimenes']) !== (int) $validated['num_especimenes']) {
+            return back()->withInput()->withErrors([
+                'especimenes' => 'La cantidad de especímenes capturados no coincide con "No. Especímenes".',
+            ]);
+        }
+
         $fechaMuestreo = Carbon::parse($validated['fecha_muestreo']);
 
-        // Regla de negocio: máximo 2 ensayos agendados por día (a nivel laboratorio)
         $fechasCalculadas = [];
         foreach ($validated['fechas_ensayo'] ?? [] as $dia) {
             $fechaCalculada = $fechaMuestreo->copy()->addDays((int) $dia);
             $fechasCalculadas[] = ['dia' => (int) $dia, 'fecha_ensayo' => $fechaCalculada];
-
-            $countEseDia = FechaEnsayo::whereDate('fecha_ensayo', $fechaCalculada)->count();
-            if ($countEseDia >= 2) {
-                return back()->withInput()->withErrors([
-                    'fechas_ensayo' => "Ya hay 2 ensayos agendados para el {$fechaCalculada->format('d/m/Y')}.",
-                ]);
-            }
         }
 
         try {
@@ -102,23 +130,32 @@ class RecepcionController extends Controller
                     'cliente' => $validated['cliente'] ?? null,
                     'obra' => $validated['obra'] ?? null,
                     'atencion_a' => $validated['atencion_a'] ?? null,
-                    'numero_muestra' => $validated['numero_muestra'] ?? null,
+                    'n_informe' => $validated['numero_informe'] ?? null,
                     'fecha_rec' => $validated['fecha_recepcion'],
                     'n_espec' => $validated['num_especimenes'],
-                    'elemento' => $validated['elemento'], // el mutator lo pasa a mayúsculas
-                    'localizacion' => $validated['localizacion'],
                     'datos_proy' => $validated['datos_proyecto'] ?? null,
                     'defectos' => $validated['defectos_especimen'] ?? null,
                     'envia' => $validated['envia'] ?? null,
                     'recibe' => $validated['recibe'] ?? null,
                     'fecha_muest' => $validated['fecha_muestreo'],
+                    'fecha_colado' => $validated['fecha_colado'],
                     'observ' => $validated['observaciones'] ?? null,
                     'usuario_reg_id' => session('sesionUsuario'),
                     'fecha_reg' => now(),
                 ]);
 
-                // Si el elemento no existe en el catálogo, lo agregamos
-                Elemento::firstOrCreate(['nombre' => $recepcion->elemento]);
+                foreach ($validated['especimenes'] as $e) {
+                    EnsayoNucleo::create([
+                        'recepcion_id' => $recepcion->id_seg,
+                        'no_nucleo'    => $e['numero_muestra'],
+                        'elemento'     => $e['elemento'],
+                        'espesor'      => $e['espesor'],
+                        'localizacion' => $e['localizacion'],
+                    ]);
+
+                    // Si el elemento no existe en el catálogo, lo agregamos
+                    Elemento::firstOrCreate(['nombre' => strtoupper(trim($e['elemento']))]);
+                }
 
                 foreach ($fechasCalculadas as $f) {
                     FechaEnsayo::create([

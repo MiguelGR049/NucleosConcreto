@@ -226,6 +226,18 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(225, 92, 0, 0.15);
 }
 
+.especimen-card {
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    padding: 1rem;
+}
+
+.especimen-titulo {
+    color: rgb(225, 92, 0);
+    font-weight: 600;
+    margin-bottom: .75rem;
+}
+
 .form-check-input:checked {
     background-color: rgb(225, 92, 0);
     border-color: rgb(225, 92, 0);
@@ -371,4 +383,143 @@ body {
 
 .btn-nucleo:disabled {
     opacity: .45;
+}
+
+/* ===========================
+   ENSAYO DE NÚCLEOS
+=========================== */
+/* Misma razón que .propiedades-card: .card hereda max-width 300px del login */
+.ensayo-contenedor {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.card.ensayo-card {
+    width: 100%;
+    max-width: 100%;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.ensayo-card-body {
+    padding: 1rem;
+}
+
+.ensayo-folio {
+    color: rgb(225, 92, 0);
+    font-weight: 600;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+}
+
+.ensayo-nucleo-badge {
+    display: inline-block;
+    background-color: #fff3ea;
+    color: rgb(225, 92, 0);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.ensayo-dato {
+    margin-bottom: 0.75rem;
+}
+
+.ensayo-dato small {
+    display: block;
+    color: #6c757d;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.ensayo-dato span {
+    color: #333;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+/* Botón Ensayar: ancho completo en celular, automático en pantallas mayores */
+.btn-ensayar {
+    width: 100%;
+}
+
+/* Modal de ensayo
+   (reutiliza el arreglo de scroll de .hoja-modal para el <form> dentro de .modal-content) */
+.ensayo-modal .modal-title {
+    color: rgb(225, 92, 0);
+    font-weight: 600;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+}
+
+.ensayo-modal-seccion {
+    color: rgb(225, 92, 0);
+    font-weight: 600;
+    font-size: clamp(1rem, 2.3vw, 1.15rem);
+    margin-bottom: 0.75rem;
+}
+
+.ensayo-modal .tabla-medidas {
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.ensayo-modal .tabla-medidas th {
+    background-color: #fff3ea;
+    color: rgb(225, 92, 0);
+    font-weight: 600;
+}
+
+.ensayo-modal .resultado {
+    background-color: #fff3ea;
+    font-weight: 600;
+}
+
+@media (min-width: 576px) {
+    .btn-ensayar {
+        width: auto;
+        min-width: 150px;
+    }
+
+    .ensayo-card-body {
+        padding: 1.5rem;
+    }
+}
+
+/* ===== Consulta resultado: modal ===== */
+.d-contents {
+    display: contents;
+}
+
+.seccion-titulo {
+    background: rgb(16, 77, 141);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    font-size: .8rem;
+    letter-spacing: .5px;
+}
+
+.tabla-resultados {
+    font-size: .85rem;
+    white-space: nowrap;
+}
+
+.tabla-resultados th {
+    position: sticky;
+    left: 0;
+    background: rgba(16, 77, 141, .12);
+    min-width: 200px;
+    z-index: 1;
+}
+
+.tabla-resultados td {
+    min-width: 110px;
+    text-align: center;
+}
+
+.tabla-resultados tr.fila-calculada td {
+    background: repeating-linear-gradient(45deg, #f4f4f4, #f4f4f4 4px, #e8e8e8 4px, #e8e8e8 8px);
 }
