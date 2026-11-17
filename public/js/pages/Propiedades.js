@@ -13,8 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const DEC_VISTA = 2;          // decimales que se muestran
     const DEC_REAL = 4;          // decimales que se conservan (igual que la base de datos)
     const PI_XLS = 3.1416;     // el mismo valor que usa el Excel
-    const KGF_POR_KN = 101.972;    // kN -> kg
-    const DIV_MPA = 10.1972;    // kg/cm² -> MPa
 
     let maxPermitido = 1;            // tope para la fecha elegida (lo calcula el servidor)
     let nucleosPend = [];            // núcleos pendientes de la recepción elegida
@@ -297,50 +295,24 @@ document.addEventListener('DOMContentLoaded', function () {
         const masa = valor(c, 'masa_g');
         const d1 = valor(c, 'diametro_1_mm'), d2 = valor(c, 'diametro_2_mm');
         const s1 = valor(c, 'altura_1_sin_cabeceo_mm'), s2 = valor(c, 'altura_2_sin_cabeceo_mm');
-        const c1 = valor(c, 'altura_1_con_cabeceo_mm'), c2 = valor(c, 'altura_2_con_cabeceo_mm');
-        const kn = valor(c, 'carga_kn');
 
-        // En el Excel, una celda vacía o en 0 deja el resultado en blanco.
         const prom = (a, b) => (a && b !== null) ? (a + b) / 2 : null;
 
-        const dProm = prom(d1, d2);    // fila 14
-        const hSin = prom(s1, s2);    // fila 17
-        const hCon = prom(c1, c2);    // fila 20
+        const dProm = prom(d1, d2);
+        const hSin = prom(s1, s2);
 
-        // fila 23: (d² · 3.1416 / 4) / 100
         const area = (s1 > 0 && dProm !== null)
             ? (dProm * dProm * PI_XLS / 4) / 100
             : null;
 
-        // fila 11: (masa / (altura sin cabeceo · área)) · 10000
         const masaUnit = (masa && hSin && area)
             ? (masa / (hSin * area)) * 10000
             : null;
 
-        // fila 21: altura con cabeceo / diámetro promedio
-        const esbeltez = (s1 && hCon !== null && dProm)
-            ? hCon / dProm
-            : null;
-
-        const factor = factorCorreccion(esbeltez);   // fila 22
-
-        // filas 25, 27, 28, 29
-        const kg = kn ? kn * KGF_POR_KN : null;
-        const esfDirecto = (kg !== null && area) ? kg / area : null;
-        const esfReal = (esfDirecto !== null && factor !== null) ? esfDirecto * factor : null;
-        const esfMpa = esfReal !== null ? esfReal / DIV_MPA : null;
-
         setCalc(c, 'masa_unitaria', masaUnit);
         setCalc(c, 'diametro_prom', dProm);
         setCalc(c, 'altura_prom_sin', hSin);
-        setCalc(c, 'altura_prom_con', hCon);
-        setCalc(c, 'esbeltez', esbeltez);
-        setCalc(c, 'factor', factor);
         setCalc(c, 'area', area);
-        setCalc(c, 'carga_kg', kg);
-        setCalc(c, 'esf_directo', esfDirecto);
-        setCalc(c, 'esf_real', esfReal);
-        setCalc(c, 'esf_real_mpa', esfMpa);
     }
 
     /* ---------- Envío ---------- */

@@ -30,6 +30,14 @@
             Consulta resultado
         </a>
     </div>
+    @if(session('areaUsuario') === 'Administracion')
+    <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+        <a href="{{ route('correccion') }}" id="correccion" class="btn d-flex flex-column justify-content-center align-items-center text-decoration-none">
+            <i class="fa-solid fa-edit mb-1"></i>
+            Correccion de datos
+        </a>
+    </div>
+    @endif
 
 </div>
 @endsection

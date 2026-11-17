@@ -186,6 +186,9 @@
     ['mpa', 'ESFUERZO REAL, MPa', true],
     ['u', 'U (±), MPa', true],
     ];
+
+    // Cualquier valor vacío o no registrado se muestra como "-"
+    $v = fn($x) => ($x === null || trim((string) $x) === '') ? '-' : $x;
     @endphp
 
     @foreach($d['paginas'] as $p)
@@ -215,37 +218,37 @@
                     <td colspan="2" class="gb"></td>
                     <td class="az gb gt">INFORME:</td>
                     <td class="gb gt" style="text-align:center; padding-left:5pt;">LIE. RC.</td>
-                    <td class="gb gt" style="text-align:center; padding-right:5pt;">{{ $d['n_informe'] ?? '' }}</td>
+                    <td class="gb gt" style="text-align:center; padding-right:5pt;">{{ $v($d['n_informe'] ?? '') }}</td>
                 </tr>
                 <tr>
                     <td class="az s gb">FECHA DE INFORME: </td>
-                    <td class="gb" style="text-align:center;">{{ $d['fecha_informe'] ?? '' }}</td>
+                    <td class="gb" style="text-align:center;">{{ $v($d['fecha_informe'] ?? '') }}</td>
                     <td class="az gb">CLAVE DE OBRA:</td>
-                    <td class="gb b" colspan="2" style="text-align:center;">{{ $d['clave_obra'] ?? '' }}</td>
+                    <td class="gb b" colspan="2" style="text-align:center;">{{ $v($d['clave_obra'] ?? '') }}</td>
                 </tr>
                 <tr>
                     <td class="az gb">CLIENTE:</td>
-                    <td class="gb b" colspan="4" style="text-align:center;">{{ $d['cliente'] ?? '' }}</td>
+                    <td class="gb b" colspan="4" style="text-align:center;">{{ $v($d['cliente'] ?? '') }}</td>
                 </tr>
                 <tr>
                     <td class="az gb">OBRA:</td>
-                    <td class="gb b" colspan="4" style="text-align:center;">{{ $d['obra'] ?? '' }}</td>
+                    <td class="gb b" colspan="4" style="text-align:center;">{{ $v($d['obra'] ?? '') }}</td>
                 </tr>
                 <tr>
                     <td class="az gb">PROCEDENCIA:</td>
-                    <td class="gb" colspan="4" style="text-align:center;">{{ $d['procedencia'] ?? '' }}</td>
+                    <td class="gb" colspan="4" style="text-align:center;">{{ $v($d['procedencia'] ?? '') }}</td>
                 </tr>
                 <tr>
                     <td class="az s gb">ELEMENTO:</td>
-                    <td class="gb" style="text-align:center;">{{ $d['elemento'] ?? '' }}</td>
+                    <td class="gb" style="text-align:center;">{{ $v($d['elemento'] ?? '') }}</td>
                     <td class="az gb">FECHA DE EXTRACCIÓN:</td>
-                    <td class="gb" colspan="2" style="text-align:center;">{{ $d['fecha_extraccion'] ?? '' }}</td>
+                    <td class="gb" colspan="2" style="text-align:center;">{{ $v($d['fecha_extraccion'] ?? '') }}</td>
                 </tr>
                 <tr>
                     <td class="az s gb">CON ATENCIÓN A:</td>
-                    <td class="gb b" style="text-align:center;">{{ $d['atencion_a'] ?? '' }}</td>
+                    <td class="gb b" style="text-align:center;">{{ $v($d['atencion_a'] ?? '') }}</td>
                     <td class="az gb">MUESTREADO POR:</td>
-                    <td class="gb" colspan="2" style="text-align:center;">{{ $d['muestreado_por'] ?? '' }}</td>
+                    <td class="gb" colspan="2" style="text-align:center;">{{ $v($d['muestreado_por'] ?? '') }}</td>
                 </tr>
             </table>
         </div>
@@ -266,19 +269,19 @@
                 </tr>
                 <tr>
                     <td class="cl c ab" style="text-align:center;">T. N., mm:</td>
-                    <td class="ab c">{{ $d['tn'] ?? '' }}</td>
+                    <td class="ab c">{{ $v($d['tn'] ?? '') }}</td>
                     <td class="cl c ab" style="text-align:center;">REVENIMIENTO, cm</td>
-                    <td class="ab c">{{ $d['revenimiento'] ?? '' }}</td>
+                    <td class="ab c">{{ $v($d['revenimiento'] ?? '') }}</td>
                     <td class="cl c" rowspan="2" style="text-align:center; font-size:5.5pt; white-space:normal; line-height:6.6pt; border-bottom:0.8pt solid #0070C0;">
                         RESISTENCIA DE<br>PROYECTO,<br>kg·cm<sup>-2</sup>
                     </td>
-                    <td class="b c" rowspan="2" style="border-bottom:0.8pt solid #0070C0;">{{ $d['resistencia'] ?? '' }}</td>
+                    <td class="b c" rowspan="2" style="border-bottom:0.8pt solid #0070C0;">{{ $v($d['resistencia'] ?? '') }}</td>
                 </tr>
                 <tr>
                     <td class="cl c ab" style="text-align:center;">CONCRETO:</td>
-                    <td class="ab c">{{ $d['concreto'] ?? '' }}</td>
+                    <td class="ab c">{{ $v($d['concreto'] ?? '') }}</td>
                     <td class="cl c ab" style="text-align:center;">TIPO DE CEMENTO:</td>
-                    <td class="ab c">{{ $d['cemento'] ?? '' }}</td>
+                    <td class="ab c">{{ $v($d['cemento'] ?? '') }}</td>
                 </tr>
             </table>
         </div>
@@ -300,7 +303,7 @@
                 <tr>
                     <td class="cl ab">{!! $etiqueta !!}</td>
                     @for($c = 0; $c < 4; $c++)
-                        <td class="ab {{ $calculada ? 'calc' : '' }}">{{ $p['nucleos'][$c][$clave] ?? '' }}</td>
+                        <td class="ab {{ $calculada ? 'calc' : '' }}">{{ $v($p['nucleos'][$c][$clave] ?? '') }}</td>
                         @endfor
                 </tr>
                 @endforeach
@@ -316,11 +319,11 @@
                 </tr>
                 <tr>
                     <td class="az">DECLARACIÓN DE CONFORMIDAD:</td>
-                    <td class="b" style="text-align: center; padding-left: 4pt;">{{ $p['conformidad'] ?? '' }}</td>
+                    <td class="b" style="text-align: center; padding-left: 4pt;">{{ $v($p['conformidad'] ?? '') }}</td>
                 </tr>
                 <tr>
                     <td class="cl">OBSERVACIONES:</td>
-                    <td style="text-align: center; padding-left: 4pt;">{{ $d['observaciones'] ?? '' }}</td>
+                    <td style="text-align: center; padding-left: 4pt;">{{ $v($d['observaciones'] ?? '') }}</td>
                 </tr>
                 <tr>
                     <td class="cl">MÉTODOS DE REFERENCIA:</td>

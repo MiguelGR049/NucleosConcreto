@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const tabla = document.getElementById('mdTabla');
     const inputResistencia = document.getElementById('mdResistencia');
     const selectMuestreadoPor = document.getElementById('mdMuestreadoPor');
-    const inputFechaInforme = document.getElementById('mdFechaInforme');
 
     const DEC_VISTA = 2;
     const PI_XLS = 3.1416;      // el mismo valor que usa el Excel
@@ -37,10 +36,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Para el PDF: sin separador de miles, como en el Excel
-    function fmtPdf(n, dec) {
+    // Para el PDF: máximo 1 decimal; si es entero, sin decimales (12.0 -> "12")
+    function fmtPdf(n) {
         if (n === null || n === undefined || !isFinite(n)) return '';
-        return redondear(n, dec).toFixed(dec);
+        return String(redondear(n, 1));
+    }
+
+    // Para el PDF: siempre 1 decimal (12 -> "12.0")
+    function fmtPdf1(n) {
+        if (n === null || n === undefined || !isFinite(n)) return '';
+        return redondear(n, 1).toFixed(1);
     }
 
     const fecha = f => {
@@ -64,6 +69,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const f = aMs(fin), i = aMs(ini);
         return (f === null || i === null) ? null : Math.round((f - i) / 86400000);
     }
+
+    // Edad de ensaye de un núcleo: fecha de ensayo de su día - fecha de colado
+    const edadNucleo = n => diasEntre(n.fecha_ensayo, n.fecha_colado);
 
     const poner = (id, v) => { document.getElementById(id).value = v ?? ''; };
     const leer = id => document.getElementById(id).value;
@@ -121,7 +129,8 @@ document.addEventListener('DOMContentLoaded', function () {
     //   y    mínimo de (esfuerzo real - U) por núcleo >= 0.75 * resistencia
     function declaracionConformidad(calc, claveObra, resistencia) {
         if (!claveObra) return '';                       // =SI(I2=0,"",...)
-        if (!resistencia || resistencia <= 0) return ''; // sin resistencia de proyecto no se declara nada
+        // Sin resistencia de proyecto no se puede evaluar cumplimiento
+        if (!resistencia || resistencia <= 0) return 'ANÁLISIS INFORMATIVO';
 
         // Solo los núcleos ya ensayados (con esfuerzo real y U)
         const difs = calc
@@ -142,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function observacionesHoja(muestreadoPor) {
         return muestreadoPor === 'CLIENTE'
             ? 'LA MUESTRA ES PROPORCIONADA POR EL CLIENTE, LIEC SOLO SE RESPONSABILIZA DEL ENSAYO.'
-            : '---';
+            : '-';
     }
 
     function actualizarPie() {
@@ -155,11 +164,9 @@ document.addEventListener('DOMContentLoaded', function () {
         campo.value = declaracionConformidad(calcActual, recepcionActual.clave_obra, resistencia);
 
         // Si queda vacío, el placeholder explica por qué
-        campo.placeholder = !resistencia
-            ? 'Captura la resistencia de proyecto para ver la declaración.'
-            : ensayados === 0
-                ? 'Aún no hay núcleos ensayados (falta la carga en kN).'
-                : '';
+        campo.placeholder = ensayados === 0
+            ? 'Aún no hay núcleos ensayados (falta la carga en kN).'
+            : '';
 
         poner('mdObservHoja', observacionesHoja(selectMuestreadoPor.value));
     }
@@ -167,19 +174,15 @@ document.addEventListener('DOMContentLoaded', function () {
     inputResistencia.addEventListener('input', actualizarPie);
     selectMuestreadoPor.addEventListener('change', actualizarPie);
 
-    // La edad de ensaye depende de la fecha de informe
-    inputFechaInforme.addEventListener('change', function () {
-        if (recepcionActual) pintarTabla(recepcionActual, calcActual);
-    });
-
     /* ---------- Filas de la tabla del modal (c: true = calculada, con trama) ---------- */
+    /*n - núcleo, c - calculado, i - índice, r - recepción*/
     const filas = [
         { t: 'No. de muestra / núcleo', v: (n, c, i) => n.no_nucleo || (i + 1) },
         { t: 'Elemento', v: (n, c, i, r) => n.elemento },
         { t: 'Localización', v: (n, c, i, r) => n.localizacion },
-        { t: 'Fecha de colado', v: (n, c, i, r) => fecha(r.fecha_colado) },
+        { t: 'Fecha de colado', v: (n, c, i, r) => fecha(n.fecha_colado) },
         { t: 'Espesor, mm', v: n => fmt(val(n.espesor)) },
-        { t: 'Edad de ensaye, días', v: (n, c, i, r) => diasEntre(inputFechaInforme.value, r.fecha_colado) ?? '', c: true },
+        { t: 'Edad de ensaye, días', v: (n, c, i, r) => edadNucleo(n) ?? '7', c: true },
         { t: 'Masa del espécimen, g', v: n => fmt(val(n.masa_g)) },
         { t: 'Masa volumétrica, kg·m⁻³', v: (n, c) => fmt(c.masaUnit), c: true },
         { t: 'Diámetro 1, mm', v: n => fmt(val(n.diametro_1_mm)) },
@@ -231,34 +234,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* ---------- Datos para el PDF ---------- */
     // Los decimales de cada fila son los del formato CON-LAB-07
-    function nucleoPdf(n, c, i, r, edad) {
+    function nucleoPdf(n, c, i, r) {
         return {
             no_nucleo: n.no_nucleo || (i + 1),
             elemento: n.elemento ?? '',
             localizacion: n.localizacion ?? '',
-            fecha_colado: fechaBarras(r.fecha_colado),
+            fecha_colado: fechaBarras(n.fecha_colado),
             espesor: fmtPdf(val(n.espesor), 2),
-            edad: edad ?? '',
+            edad: edadNucleo(n) ?? '7', // fecha de ensayo del núcleo - fecha de colado
             masa: fmtPdf(val(n.masa_g), 0),
-            masa_vol: fmtPdf(c.masaUnit, 0),
-            d1: fmtPdf(val(n.diametro_1_mm), 2),
-            d2: fmtPdf(val(n.diametro_2_mm), 2),
-            dprom: fmtPdf(c.dProm, 1),
-            a1s: fmtPdf(val(n.altura_1_sin_cabeceo_mm), 2),
-            a2s: fmtPdf(val(n.altura_2_sin_cabeceo_mm), 2),
-            apsin: fmtPdf(c.hSin, 1),
-            a1c: fmtPdf(val(n.altura_1_con_cabeceo_mm), 0),
-            a2c: fmtPdf(val(n.altura_2_con_cabeceo_mm), 0),
-            apcon: fmtPdf(c.hCon, 1),
-            esb: fmtPdf(c.esbeltez, 1),
-            factor: fmtPdf(c.factor, 3),
-            area: fmtPdf(c.area, 1),
-            kn: fmtPdf(val(n.carga_kn), 0),
-            kg: fmtPdf(c.kg, 0),
+            masa_vol: fmtPdf1(c.masaUnit),
+            d1: fmtPdf1(val(n.diametro_1_mm)),
+            d2: fmtPdf1(val(n.diametro_2_mm)),
+            dprom: fmtPdf1(c.dProm),
+            a1s: fmtPdf1(val(n.altura_1_sin_cabeceo_mm)),
+            a2s: fmtPdf1(val(n.altura_2_sin_cabeceo_mm)),
+            apsin: fmtPdf1(c.hSin),
+            a1c: fmtPdf1(val(n.altura_1_con_cabeceo_mm)),
+            a2c: fmtPdf1(val(n.altura_2_con_cabeceo_mm)),
+            apcon: fmtPdf1(c.hCon),
+            esb: fmtPdf1(c.esbeltez),
+            factor: fmtPdf1(c.factor),
+            area: fmtPdf1(c.area),
+            kn: fmtPdf1(val(n.carga_kn)),
+            kg: fmtPdf1(c.kg),
             falla: n.tipo_falla ?? '',
-            directo: fmtPdf(c.esfDirecto, 0),
-            real: fmtPdf(c.esfReal, 0),
-            mpa: fmtPdf(c.esfMpa, 1),
+            directo: fmtPdf1(c.esfDirecto),
+            real: fmtPdf1(c.esfReal),
+            mpa: fmtPdf1(c.esfMpa),
             u: fmtPdf(c.u, 2),
         };
     }
@@ -267,7 +270,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const r = recepcionActual;
         const nucleos = r.nucleos || [];
         const fechaInforme = leer('mdFechaInforme');
-        const edad = diasEntre(fechaInforme, r.fecha_colado);
         const resistencia = parseFloat(inputResistencia.value);
 
         // Una hoja (página) por cada 4 núcleos
@@ -275,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function () {
         for (let i = 0; i < nucleos.length; i += POR_PAGINA) {
             const calcs = calcActual.slice(i, i + POR_PAGINA);
             paginas.push({
-                nucleos: nucleos.slice(i, i + POR_PAGINA).map((n, j) => nucleoPdf(n, calcs[j], i + j, r, edad)),
+                nucleos: nucleos.slice(i, i + POR_PAGINA).map((n, j) => nucleoPdf(n, calcs[j], i + j, r)),
                 conformidad: declaracionConformidad(calcs, r.clave_obra, resistencia),
             });
         }

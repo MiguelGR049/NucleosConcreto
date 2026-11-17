@@ -37,6 +37,13 @@
                     <i class="bi bi-house-door me-1"></i>Inicio
                 </a>
             </li>
+            @if(session('areaUsuario') === 'TI')
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('usuario') }}">
+                    <i class="bi bi-people me-1"></i>Usuarios
+                </a>
+            </li>
+            @endif
         </ul>
 
         <div class="mt-auto">

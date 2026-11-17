@@ -70,16 +70,22 @@
                     data-id="{{ $nucleo->id_seg }}"
                     data-folio="{{ $nucleo->folio }}"
                     data-nucleo="{{ $nucleo->no_nucleo }}"
+                    data-fecha="{{ \Carbon\Carbon::parse($nucleo->fecha_ensayo)->format('d/m/Y') }}"
+                    data-clave-obra="{{ $nucleo->clave_obra }}"
                     data-obra="{{ $nucleo->obra }}"
-                    data-masa="{{ $nucleo->masa_g }}"
-                    data-d1="{{ $nucleo->diametro_1_mm }}"
-                    data-d2="{{ $nucleo->diametro_2_mm }}"
-                    data-s1="{{ $nucleo->altura_1_sin_cabeceo_mm }}"
-                    data-s2="{{ $nucleo->altura_2_sin_cabeceo_mm }}"
-                    data-c1="{{ $nucleo->altura_1_con_cabeceo_mm }}"
-                    data-c2="{{ $nucleo->altura_2_con_cabeceo_mm }}"
-                    data-carga="{{ $nucleo->carga_kn }}"
-                    data-falla="{{ $nucleo->tipo_falla }}">
+                    data-elemento="{{ $nucleo->elemento }}"
+                    data-espesor="{{ $nucleo->espesor }}"
+                    data-localizacion="{{ $nucleo->localizacion }}"
+                    data-dia="{{ $nucleo->dia }}"
+                    data-masa_g="{{ $nucleo->masa_g }}"
+                    data-diametro_1_mm="{{ $nucleo->diametro_1_mm }}"
+                    data-diametro_2_mm="{{ $nucleo->diametro_2_mm }}"
+                    data-altura_1_sin_cabeceo_mm="{{ $nucleo->altura_1_sin_cabeceo_mm }}"
+                    data-altura_2_sin_cabeceo_mm="{{ $nucleo->altura_2_sin_cabeceo_mm }}"
+                    data-altura_1_con_cabeceo_mm="{{ $nucleo->altura_1_con_cabeceo_mm }}"
+                    data-altura_2_con_cabeceo_mm="{{ $nucleo->altura_2_con_cabeceo_mm }}"
+                    data-carga_kn="{{ $nucleo->carga_kn }}"
+                    data-tipo_falla="{{ $nucleo->tipo_falla }}">
                     Ensayar
                 </button>
             </div>
@@ -103,103 +109,137 @@
 </div>
 
 {{-- Modal único: se llena con los datos del núcleo seleccionado --}}
-<div
-    class="modal fade hoja-modal ensayo-modal" id="modalEnsayo" tabindex="-1" aria-labelledby="modalEnsayoTitulo" aria-hidden="true" data-old-nucleo="{{ old('nucleo_id') }}" data-old-carga="{{ old('carga_kn') }}" data-old-falla="{{ old('tipo_falla') }}" data-hay-errores="{{ $errors->any() ? '1' : '0' }}">
+@php
+// t = info | num (editable) | calc | txt
+// dep = datos que, si faltan, mandan el renglón a "Por capturar"
+// (si no se indica, depende de sí mismo; info no depende de nada)
+$filas = [
+['k' => 'elemento', 'l' => 'Elemento', 't' => 'info', 'dep' => []],
+['k' => 'espesor', 'l' => 'Espesor mm', 't' => 'info', 'dep' => []],
+['k' => 'localizacion', 'l' => 'Localización', 't' => 'info', 'dep' => []],
+['k' => 'dia', 'l' => 'Edad de ensayo días', 't' => 'info', 'dep' => []],
+['k' => 'masa_g', 'l' => 'Masa del espécimen g', 't' => 'num'],
+['k' => 'masa_unitaria', 'l' => 'Masa unitaria kg/m³', 't' => 'calc',
+'dep' => ['masa_g', 'diametro_1_mm', 'diametro_2_mm', 'altura_1_sin_cabeceo_mm', 'altura_2_sin_cabeceo_mm']],
+['k' => 'diametro_1_mm', 'l' => 'Diámetro 1 mm', 't' => 'num'],
+['k' => 'diametro_2_mm', 'l' => 'Diámetro 2 mm', 't' => 'num'],
+['k' => 'diametro_prom', 'l' => 'Diámetro promedio mm', 't' => 'calc',
+'dep' => ['diametro_1_mm', 'diametro_2_mm']],
+['k' => 'altura_1_sin_cabeceo_mm', 'l' => 'Altura 1 sin cabeceo mm', 't' => 'num'],
+['k' => 'altura_2_sin_cabeceo_mm', 'l' => 'Altura 2 sin cabeceo mm', 't' => 'num'],
+['k' => 'altura_prom_sin', 'l' => 'Altura promedio sin cabeceo mm', 't' => 'calc',
+'dep' => ['altura_1_sin_cabeceo_mm', 'altura_2_sin_cabeceo_mm']],
+['k' => 'altura_1_con_cabeceo_mm', 'l' => 'Altura 1 con cabeceo mm', 't' => 'num'],
+['k' => 'altura_2_con_cabeceo_mm', 'l' => 'Altura 2 con cabeceo mm', 't' => 'num'],
+['k' => 'altura_prom_con', 'l' => 'Altura promedio con cabeceo mm', 't' => 'calc',
+'dep' => ['altura_1_con_cabeceo_mm', 'altura_2_con_cabeceo_mm']],
+['k' => 'esbeltez', 'l' => 'Esbeltez (h/d)', 't' => 'calc',
+'dep' => ['altura_1_con_cabeceo_mm', 'altura_2_con_cabeceo_mm', 'diametro_1_mm', 'diametro_2_mm']],
+['k' => 'factor', 'l' => 'Factor de corrección', 't' => 'calc',
+'dep' => ['altura_1_con_cabeceo_mm', 'altura_2_con_cabeceo_mm', 'diametro_1_mm', 'diametro_2_mm']],
+['k' => 'area', 'l' => 'Área cm²', 't' => 'calc',
+'dep' => ['diametro_1_mm', 'diametro_2_mm']],
+['k' => 'carga_kn', 'l' => 'Carga aplicada kN', 't' => 'num'],
+['k' => 'carga_kg', 'l' => 'Carga kgf', 't' => 'calc',
+'dep' => ['carga_kn']],
+['k' => 'esf_directo', 'l' => 'Esfuerzo directo kg/cm²', 't' => 'calc',
+'dep' => ['carga_kn', 'diametro_1_mm', 'diametro_2_mm']],
+['k' => 'esf_real', 'l' => 'Esfuerzo real kg/cm²', 't' => 'calc',
+'dep' => ['carga_kn', 'diametro_1_mm', 'diametro_2_mm', 'altura_1_con_cabeceo_mm', 'altura_2_con_cabeceo_mm']],
+['k' => 'esf_real_mpa', 'l' => 'Esfuerzo real MPa', 't' => 'calc',
+'dep' => ['carga_kn', 'diametro_1_mm', 'diametro_2_mm', 'altura_1_con_cabeceo_mm', 'altura_2_con_cabeceo_mm']],
+['k' => 'tipo_falla', 'l' => 'Tipo de falla', 't' => 'sel'],
+];
+@endphp
 
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-md-down">
+{{-- Modal único: se llena con los datos del núcleo seleccionado --}}
+<div class="modal fade hoja-modal ensayo-modal" id="modalEnsayo" tabindex="-1" aria-labelledby="modalEnsayoTitulo" aria-hidden="true"
+    data-old="{{ json_encode(old()) }}"
+    data-hay-errores="{{ $errors->any() ? '1' : '0' }}">
+
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-lg-down">
         <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEnsayoTitulo">
+                    Ensayo · Folio <span id="ensayoFolio"></span> · Núcleo <span id="ensayoNumero"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
 
             <form action="{{ route('ensayo.guardar') }}" method="POST" id="formEnsayo">
                 @csrf
                 <input type="hidden" name="nucleo_id" id="ensayoNucleoId">
 
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalEnsayoTitulo">
-                        Ensayo · Folio <span id="ensayoFolio"></span> · Núcleo <span id="ensayoNumero"></span>
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-
                 <div class="modal-body">
 
-                    <h6 class="ensayo-modal-seccion">Datos y medidas del núcleo</h6>
+                    {{-- Encabezado --}}
+                    <div class="row g-2 g-md-3 mb-3">
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Fecha de ensayo</label>
+                            <input type="text" id="h-fecha" class="form-control bg-light" readonly>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Clave de obra</label>
+                            <input type="text" id="h-clave-obra" class="form-control bg-light" readonly>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">Obra</label>
+                            <input type="text" id="h-obra" class="form-control bg-light" readonly>
+                        </div>
+                    </div>
 
-                    <div class="table-responsive mb-4">
-                        <table class="table table-bordered table-sm align-middle tabla-medidas mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Masa (g)</th>
-                                    <th>Diámetro 1 (mm)</th>
-                                    <th>Diámetro 2 (mm)</th>
-                                    <th>Alt. sin cabeceo 1 (mm)</th>
-                                    <th>Alt. sin cabeceo 2 (mm)</th>
-                                    <th>Alt. con cabeceo 1 (mm)</th>
-                                    <th>Alt. con cabeceo 2 (mm)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td data-medida="masa"></td>
-                                    <td data-medida="d1"></td>
-                                    <td data-medida="d2"></td>
-                                    <td data-medida="s1"></td>
-                                    <td data-medida="s2"></td>
-                                    <td data-medida="c1"></td>
-                                    <td data-medida="c2"></td>
+                    <div class="hoja-titulo">TABLA DE RESULTADOS</div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm align-middle mb-0 hoja-tabla" id="tabla-ensayo">
+
+                            {{-- Lo que falta capturar + sus cálculos (se llena desde JS) --}}
+                            <tbody id="tbody-pendiente">
+                                <tr class="hoja-seccion hoja-seccion-pend">
+                                    <th colspan="2">Por capturar</th>
                                 </tr>
                             </tbody>
+
+                            {{-- Lo que ya estaba capturado + sus cálculos (se llena desde JS) --}}
+                            <tbody id="tbody-capturado">
+                                <tr class="hoja-seccion hoja-seccion-cap">
+                                    <th colspan="2">Ya capturado</th>
+                                </tr>
+
+                                @foreach ($filas as $f)
+                                <tr data-fila="{{ $f['k'] }}"
+                                    data-dep="{{ implode(',', $f['dep'] ?? [$f['k']]) }}">
+                                    <th scope="row" class="hoja-label">{{ $f['l'] }}</th>
+                                    <td class="hoja-celda {{ in_array($f['t'], ['calc', 'info']) ? 'celda-calc' : '' }}">
+                                        @if ($f['t'] === 'info')
+                                        <span data-info="{{ $f['k'] }}">—</span>
+                                        @elseif ($f['t'] === 'calc')
+                                        <span data-calc="{{ $f['k'] }}">—</span>
+                                        @elseif ($f['t'] === 'sel')
+                                        <select name="{{ $f['k'] }}" class="form-select form-select-sm text-center" required>
+                                            <option value="" selected disabled>Seleccione...</option>
+                                            @foreach (['I', 'II', 'III', 'IV', 'V', 'VI'] as $tf)
+                                            <option value="{{ $tf }}">{{ $tf }}</option>
+                                            @endforeach
+                                        </select>
+                                        @else
+                                        <input type="text" inputmode="decimal" autocomplete="off"
+                                            class="form-control form-control-sm campo-num" required>
+                                        <input type="hidden" name="{{ $f['k'] }}">
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+
                         </table>
                     </div>
-
-                    <h6 class="ensayo-modal-seccion">Captura del ensayo</h6>
-
-                    <div class="row g-3">
-                        <div class="col-12 col-md-4">
-                            <label class="form-label" for="ensayoCarga">Carga aplicada (kN)</label>
-                            <input id="ensayoCarga" type="number" name="carga_kn" class="form-control" min="0.0001" max="999999.9999" step="0.0001" placeholder="Ej. 250.5000" required>
-                            <small class="text-muted">Carga registrada durante el ensayo.</small>
-                        </div>
-
-                        <div class="col-12 col-md-8">
-                            <label class="form-label" for="ensayoFalla">Tipo de falla</label>
-                            <input id="ensayoFalla" name="tipo_falla" class="form-control" rows="2" maxlength="50" placeholder="Describe el tipo de falla del núcleo" required></input>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <h6 class="ensayo-modal-seccion">Resultados calculados automáticamente</h6>
-
-                    <div class="row g-3">
-                        <div class="col-12 col-sm-6 col-lg-4">
-                            <label class="form-label">Área (cm²)</label>
-                            <input type="text" class="form-control resultado" data-resultado="area" readonly>
-                        </div>
-                        <div class="col-12 col-sm-6 col-lg-4">
-                            <label class="form-label">Carga (kgf)</label>
-                            <input type="text" class="form-control resultado" data-resultado="kg" readonly>
-                        </div>
-                        <div class="col-12 col-sm-6 col-lg-4">
-                            <label class="form-label">Esfuerzo directo (kg/cm²)</label>
-                            <input type="text" class="form-control resultado" data-resultado="directo" readonly>
-                        </div>
-                        <div class="col-12 col-sm-6">
-                            <label class="form-label">Esfuerzo real (kg/cm²)</label>
-                            <input type="text" class="form-control resultado" data-resultado="real" readonly>
-                        </div>
-                        <div class="col-12 col-sm-6">
-                            <label class="form-label">Esfuerzo real (MPa)</label>
-                            <input type="text" class="form-control resultado" data-resultado="mpa" readonly>
-                        </div>
-                    </div>
-
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-guardar">Guardar ensayo</button>
+                    <button type="submit" class="btn btn-guardar" id="btn-guardar-ensayo">Guardar ensayo</button>
                 </div>
-
             </form>
 
         </div>

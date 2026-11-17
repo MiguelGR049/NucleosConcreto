@@ -1,5 +1,4 @@
 @extends('plantilla')
-
 @section('contenido')
 
 @section('navbar-title', 'Registro de probeta')
@@ -12,7 +11,7 @@
 $camposPaso = [
 1 => ['folio', 'clave_obra', 'cliente', 'obra', 'atencion_a', 'numero_informe', 'num_especimenes'],
 2 => ['especimenes'],
-3 => ['fecha_colado', 'fecha_muestreo', 'fecha_recepcion', 'datos_proyecto', 'defectos_especimen'],
+3 => ['fecha_muestreo', 'fecha_recepcion', 'datos_proyecto', 'defectos_especimen'],
 4 => ['fechas_ensayo', 'envia', 'recibe', 'observaciones'],
 ];
 
@@ -90,7 +89,7 @@ $pasoInicial = $pasosConError ? min($pasosConError) : 1;
                             <label class="form-label">No. Especímenes</label>
                             <select name="num_especimenes" id="num_especimenes" class="form-select" required>
                                 <option value="" selected disabled>--</option>
-                                @for($i = 1; $i <= 5; $i++)
+                                @for($i = 1; $i <= 4; $i++)
                                     <option value="{{ $i }}" {{ old('num_especimenes') == $i ? 'selected' : '' }}>{{ $i }}</option>
                                     @endfor
                             </select>
@@ -145,6 +144,21 @@ $pasoInicial = $pasosConError ? min($pasosConError) : 1;
                                             value="{{ old('especimenes.'.$i.'.localizacion') }}">
                                     </div>
 
+                                    @php $sinColado = old('especimenes.'.$i.'.sin_fecha_colado'); @endphp
+                                    <div class="col-12">
+                                        <label class="form-label">Fecha de colado</label>
+                                        <div class="input-group">
+                                            <input type="date" name="especimenes[{{ $i }}][fecha_colado]" class="form-control fecha-colado"
+                                                value="{{ $sinColado ? '' : old('especimenes.'.$i.'.fecha_colado', date('Y-m-d')) }}">
+                                            <div class="input-group-text">
+                                                <input class="form-check-input mt-0 sin-colado" type="checkbox"
+                                                    name="especimenes[{{ $i }}][sin_fecha_colado]" id="sin_colado_{{ $i }}"
+                                                    value="1" {{ $sinColado ? 'checked' : '' }}>
+                                                <label class="form-check-label ms-2 mb-0" for="sin_colado_{{ $i }}">Sin fecha</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                     </div>
@@ -156,12 +170,6 @@ $pasoInicial = $pasosConError ? min($pasosConError) : 1;
         {{-- ================= PASO 3 ================= --}}
         <div class="paso-form d-none" data-paso="3">
             <div class="row g-3">
-
-                <div class="col-12">
-                    <label class="form-label">Fecha de colado</label>
-                    <input type="date" name="fecha_colado" id="fecha_colado" class="form-control"
-                        value="{{ old('fecha_colado', date('Y-m-d')) }}">
-                </div>
 
                 <div class="col-12">
                     <label class="form-label">Fecha de muestreo</label>
@@ -193,23 +201,13 @@ $pasoInicial = $pasosConError ? min($pasosConError) : 1;
             <div class="row g-3">
 
                 <div class="col-12">
-                    <label class="form-label d-block">Fechas de ensayo</label>
-                    <small class="text-muted d-block mb-2" id="limite-fechas-msg">Selecciona el número de especímenes primero.</small>
-                    <div class="d-flex flex-column gap-2">
-                        @foreach([1, 3, 7, 14, 28] as $dia)
-                        <div class="ensayo-fila d-flex align-items-center justify-content-between">
-                            <div class="form-check d-flex align-items-center gap-2 mb-0">
-                                <input class="form-check-input" type="checkbox" name="fechas_ensayo[]"
-                                    value="{{ $dia }}" id="ensayo{{ $dia }}" data-dias="{{ $dia }}"
-                                    {{ in_array($dia, old('fechas_ensayo', [])) ? 'checked' : '' }}>
-                                <label class="form-check-label mb-0" for="ensayo{{ $dia }}">
-                                    {{ $dia }}
-                                </label>
-                            </div>
-                            <span class="fecha-aproximada-box" id="fecha-ensayo-{{ $dia }}">--</span>
-                        </div>
-                        @endforeach
+                    <label class="form-label d-block">Fecha de ensayo</label>
+                    <small class="text-muted d-block mb-2">Se realiza a 7 días.</small>
+                    <div class="ensayo-fila d-flex align-items-center justify-content-between">
+                        <span>7 días</span>
+                        <span class="fecha-aproximada-box" id="fecha-ensayo-7">--</span>
                     </div>
+                    <input type="hidden" name="fechas_ensayo[]" value="7">
                 </div>
 
                 <div class="col-12">

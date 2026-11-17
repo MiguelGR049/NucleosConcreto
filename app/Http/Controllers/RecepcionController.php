@@ -87,8 +87,9 @@ class RecepcionController extends Controller
             'especimenes.*.elemento'       => 'required|string|max:100',
             'especimenes.*.espesor'        => 'required|numeric|min:0|max:999999.99',
             'especimenes.*.localizacion'   => 'required|string|max:150',
+            'especimenes.*.fecha_colado' => 'nullable|date',
+            'especimenes.*.sin_fecha_colado' => 'nullable|boolean',
             'fecha_muestreo' => 'required|date',
-            'fecha_colado' => 'nullable|date',
             'datos_proyecto' => 'nullable|string',
             'defectos_especimen' => 'nullable|string',
             'fechas_ensayo' => 'nullable|array',
@@ -113,11 +114,10 @@ class RecepcionController extends Controller
 
         $fechaMuestreo = Carbon::parse($validated['fecha_muestreo']);
 
-        $fechasCalculadas = [];
-        foreach ($validated['fechas_ensayo'] ?? [] as $dia) {
-            $fechaCalculada = $fechaMuestreo->copy()->addDays((int) $dia);
-            $fechasCalculadas[] = ['dia' => (int) $dia, 'fecha_ensayo' => $fechaCalculada];
-        }
+        $fechasCalculadas = [[
+            'dia' => 7,
+            'fecha_ensayo' => $fechaMuestreo->copy()->addDays(7),
+        ]];
 
         try {
             $folio = DB::transaction(function () use ($validated, $fechasCalculadas) {
@@ -138,8 +138,9 @@ class RecepcionController extends Controller
                     'envia' => $validated['envia'] ?? null,
                     'recibe' => $validated['recibe'] ?? null,
                     'fecha_muest' => $validated['fecha_muestreo'],
-                    'fecha_colado' => $validated['fecha_colado'],
                     'observ' => $validated['observaciones'] ?? null,
+                    'eliminado' => false,
+                    'fecha_eliminacion' => null,
                     'usuario_reg_id' => session('sesionUsuario'),
                     'fecha_reg' => now(),
                 ]);
@@ -151,6 +152,7 @@ class RecepcionController extends Controller
                         'elemento'     => $e['elemento'],
                         'espesor'      => $e['espesor'],
                         'localizacion' => $e['localizacion'],
+                        'fecha_colado' => !empty($e['sin_fecha_colado']) ? null : ($e['fecha_colado'] ?? null),
                     ]);
 
                     // Si el elemento no existe en el catálogo, lo agregamos

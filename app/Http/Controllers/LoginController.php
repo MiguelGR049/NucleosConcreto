@@ -36,7 +36,12 @@ class LoginController extends Controller
                 ->with('error', 'Usuario o contraseña incorrectos');
         }
 
-        session()->put("sesionUsuario", $consulta->id);
+        $request->session()->regenerate(); 
+
+        session([                          
+            'sesionUsuario' => $consulta->id,
+            'areaUsuario'   => $consulta->area,
+        ]);
 
         return redirect()->route("inicio");
     }

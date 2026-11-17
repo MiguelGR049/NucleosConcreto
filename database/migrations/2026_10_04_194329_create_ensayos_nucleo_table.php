@@ -28,24 +28,25 @@ return new class extends Migration
         Schema::create('ensayos_nucleo', function (Blueprint $table) {
             $table->id('id_seg');
 
-            // NUEVO: el núcleo nace en la recepción
+            // El núcleo nace en la recepción
             $table->foreignId('recepcion_id')
                 ->constrained('recepciones', 'id_seg')
                 ->cascadeOnDelete();
 
-            // CAMBIO: nullable hasta que se asigne a una hoja (captura de propiedades)
+            // Nullable hasta que se asigne a una hoja (captura de propiedades)
             $table->foreignId('hoja_id')
                 ->nullable()
                 ->constrained('hojas_ensayo', 'id_seg')
                 ->nullOnDelete();
 
-            $table->unsignedTinyInteger('columna')->nullable();   // CAMBIO: nullable
+            $table->unsignedTinyInteger('columna')->nullable();
             $table->string('no_nucleo', 20);
             $table->string('elemento', 100);
             $table->decimal('espesor', 8, 2)->nullable();
             $table->string('localizacion', 150);
+            $table->date('fecha_colado')->nullable();
 
-            // CAMBIO: todas las mediciones nullable (se llenan en la captura)
+            // Todas las mediciones nullable (se llenan en la captura)
             $table->decimal('masa_g', 12, 4)->nullable();
             $table->decimal('diametro_1_mm', 8, 4)->nullable();
             $table->decimal('diametro_2_mm', 8, 4)->nullable();

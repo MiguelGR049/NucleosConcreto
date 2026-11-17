@@ -26,8 +26,9 @@ return new class extends Migration
             $table->string('envia')->nullable();
             $table->string('recibe')->nullable();
             $table->date('fecha_muest');
-            $table->date('fecha_colado')->nullable();
             $table->string('observ')->nullable();
+            $table->boolean('eliminado')->default(false);
+            $table->timestamp('fecha_eliminacion')->nullable();
             $table->unsignedBigInteger('usuario_reg_id');
             $table->foreign('usuario_reg_id')->references('id')->on('usuarios');
             $table->timestamp('fecha_reg')->useCurrent();

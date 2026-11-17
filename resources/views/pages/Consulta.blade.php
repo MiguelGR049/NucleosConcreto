@@ -102,7 +102,7 @@
                         <div class="col-12 col-md-6">
                             <label class="form-label small mb-1" for="mdMuestreadoPor">Muestreado por</label>
                             <select name="muestreado_por" id="mdMuestreadoPor" class="form-select form-select-sm">
-                                <option value="---">---</option>
+                                <option value="-">-</option>
                                 <option value="LIEC">LIEC</option>
                                 <option value="CLIENTE">CLIENTE</option>
                             </select>
@@ -127,7 +127,7 @@
                         <div class="col-6">
                             <label class="form-label small mb-1" for="mdConcreto">Concreto</label>
                             <select name="tipo_concreto" id="mdConcreto" class="form-select form-select-sm">
-                                @foreach(['---', 'NORMAL', 'RAPIDO'] as $op)
+                                @foreach(['-', 'NORMAL', 'RAPIDO'] as $op)
                                 <option value="{{ $op }}">{{ $op }}</option>
                                 @endforeach
                             </select>
@@ -135,7 +135,7 @@
                         <div class="col-6">
                             <label class="form-label small mb-1" for="mdCemento">Tipo de cemento</label>
                             <select name="tipo_cemento" id="mdCemento" class="form-select form-select-sm">
-                                @foreach(['---', 'CPC', 'CPO', 'CPP'] as $op)
+                                @foreach(['-', 'CPC', 'CPO', 'CPP'] as $op)
                                 <option value="{{ $op }}">{{ $op }}</option>
                                 @endforeach
                             </select>

@@ -22,11 +22,6 @@ $filas = [
 ['k' => 'altura_1_sin_cabeceo_mm', 'l' => 'Altura 1 sin cabeceo mm', 't' => 'num'],
 ['k' => 'altura_2_sin_cabeceo_mm', 'l' => 'Altura 2 sin cabeceo mm', 't' => 'num'],
 ['k' => 'altura_prom_sin', 'l' => 'Altura promedio sin cabeceo mm','t' => 'calc', 'd' => 2],
-['k' => 'altura_1_con_cabeceo_mm', 'l' => 'Altura 1 con cabeceo mm', 't' => 'num'],
-['k' => 'altura_2_con_cabeceo_mm', 'l' => 'Altura 2 con cabeceo mm', 't' => 'num'],
-['k' => 'altura_prom_con', 'l' => 'Altura promedio con cabeceo mm','t' => 'calc', 'd' => 2],
-['k' => 'esbeltez', 'l' => 'Esbeltez (h/d)', 't' => 'calc', 'd' => 2],
-['k' => 'factor', 'l' => 'Factor de corrección', 't' => 'calc', 'd' => 2],
 ['k' => 'area', 'l' => 'Área cm²', 't' => 'calc', 'd' => 2],
 ];
 @endphp
@@ -221,11 +216,6 @@ $filas = [
                             </tbody>
                         </table>
                     </div>
-
-                    <small class="text-muted d-block mt-2">
-                        Los renglones con fondo punteado se calculan solos y no se guardan.
-                        Los números se muestran con 2 decimales, pero los cálculos usan el valor completo que escribiste (hasta 4 decimales).
-                    </small>
                 </div>
 
                 <div class="modal-footer">

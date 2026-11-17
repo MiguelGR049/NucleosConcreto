@@ -18,6 +18,7 @@ class EnsayoNucleo extends Model
         'elemento',
         'espesor',
         'localizacion',
+        'fecha_colado',
         'masa_g',
         'diametro_1_mm',
         'diametro_2_mm',
@@ -31,7 +32,7 @@ class EnsayoNucleo extends Model
 
     protected function elemento(): Attribute
     {
-        return Attribute::make(set: fn(string $value) => strtoupper(trim($value)));
+        return Attribute::make(set: fn(?string $value) => $value === null ? null : strtoupper(trim($value)));
     }
 
     public function recepcion()

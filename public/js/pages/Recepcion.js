@@ -137,22 +137,36 @@ document.addEventListener('DOMContentLoaded', function () {
         const select = bloque.querySelector('.elemento-select');
         const otro = bloque.querySelector('.elemento-otro');
         const oculto = bloque.querySelector('.elemento-hidden');
+        const fechaColado = bloque.querySelector('.fecha-colado');
+        const sinColado = bloque.querySelector('.sin-colado');
+        let coladoPrevio = fechaColado.value;
+
+        function sincronizarColado() {
+            if (sinColado.checked) {
+                if (fechaColado.value) coladoPrevio = fechaColado.value;
+                fechaColado.value = '';
+                fechaColado.disabled = true;
+            } else if (!bloque.classList.contains('d-none')) {
+                fechaColado.disabled = false;
+            }
+        }
 
         function sincronizar() {
             const esOtro = select.value === '__otro__';
             otro.classList.toggle('d-none', !esOtro);
             otro.required = esOtro && !select.disabled;
             oculto.value = esOtro ? otro.value : select.value;
+            sincronizarColado();
         }
+
+        sinColado.addEventListener('change', function () {
+            sincronizarColado();
+            if (!sinColado.checked && !fechaColado.value) fechaColado.value = coladoPrevio;
+        });
 
         select.addEventListener('change', function () {
             sincronizar();
             if (select.value === '__otro__') otro.focus();
-        });
-
-        otro.addEventListener('input', function () {
-            otro.value = otro.value.toUpperCase();
-            oculto.value = otro.value;
         });
 
         // Restaurar si el servidor devolvió el formulario con errores
@@ -185,83 +199,29 @@ document.addEventListener('DOMContentLoaded', function () {
     numEsp.addEventListener('change', mostrarBloques);
     mostrarBloques();
 
-    /* ===================== FECHAS DE ENSAYO ===================== */
+    /* ===================== FECHA DE ENSAYO (7 DÍAS) ===================== */
+    const DIAS_ENSAYO = 7;
     const inputMuestreo = document.getElementById('fecha_muestreo');
-    const checks = document.querySelectorAll('#formRecepcion input[name="fechas_ensayo[]"]');
-    const selectEspecimenes = document.getElementById('num_especimenes');
-    const limiteFechasMsg = document.getElementById('limite-fechas-msg');
+    const boxEnsayo = document.getElementById('fecha-ensayo-' + DIAS_ENSAYO);
 
-    function formatearFecha(date) {
-        const dia = String(date.getDate()).padStart(2, '0');
-        const mes = String(date.getMonth() + 1).padStart(2, '0');
-        const anio = date.getFullYear();
-        return `${dia}/${mes}/${anio}`;
-    }
-
-    function actualizarFechasEnsayo() {
-        const baseValue = inputMuestreo.value; // formato YYYY-MM-DD
-        checks.forEach(function (check) {
-            const dias = parseInt(check.dataset.dias, 10);
-            const box = document.getElementById('fecha-ensayo-' + dias);
-
-            if (!check.checked || !baseValue) {
-                box.textContent = '--';
-                box.classList.remove('fecha-aproximada-activa');
-                return;
-            }
-
-            // Parseamos manualmente para evitar problemas de zona horaria
-            const [anio, mes, dia] = baseValue.split('-').map(Number);
-            const fechaBase = new Date(anio, mes - 1, dia);
-            fechaBase.setDate(fechaBase.getDate() + dias);
-
-            box.textContent = formatearFecha(fechaBase);
-            box.classList.add('fecha-aproximada-activa');
-        });
-    }
-
-    function aplicarLimiteFechas() {
-        const limite = parseInt(selectEspecimenes.value, 10) || 0;
-        const marcados = Array.from(checks).filter(c => c.checked).length;
-
-        if (limite === 0) {
-            limiteFechasMsg.textContent = 'Selecciona el número de especímenes primero.';
-        } else {
-            limiteFechasMsg.textContent = `Puedes seleccionar hasta ${limite} fecha(s) de ensayo (según tus especímenes).`;
+    function actualizarFechaEnsayo() {
+        if (!inputMuestreo.value) {
+            boxEnsayo.textContent = '--';
+            boxEnsayo.classList.remove('fecha-aproximada-activa');
+            return;
         }
+        const [anio, mes, dia] = inputMuestreo.value.split('-').map(Number);
+        const fecha = new Date(anio, mes - 1, dia);
+        fecha.setDate(fecha.getDate() + DIAS_ENSAYO);
 
-        checks.forEach(function (check) {
-            if (!check.checked) {
-                check.disabled = limite === 0 || marcados >= limite;
-            } else {
-                check.disabled = false; // los ya marcados siempre se pueden desmarcar
-            }
-        });
+        const dd = String(fecha.getDate()).padStart(2, '0');
+        const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+        boxEnsayo.textContent = `${dd}/${mm}/${fecha.getFullYear()}`;
+        boxEnsayo.classList.add('fecha-aproximada-activa');
     }
 
-    checks.forEach(function (check) {
-        check.addEventListener('change', actualizarFechasEnsayo);
-        check.addEventListener('change', aplicarLimiteFechas);
-    });
-
-    inputMuestreo.addEventListener('change', actualizarFechasEnsayo);
-    selectEspecimenes.addEventListener('change', function () {
-        // Si baja el número de especímenes, desmarca los checks sobrantes
-        const limite = parseInt(selectEspecimenes.value, 10) || 0;
-        let marcados = 0;
-        checks.forEach(function (check) {
-            if (check.checked) {
-                marcados++;
-                if (marcados > limite) check.checked = false;
-            }
-        });
-        actualizarFechasEnsayo();
-        aplicarLimiteFechas();
-    });
-
-    // Estado inicial (por si el navegador o old() dejó valores)
-    actualizarFechasEnsayo();
-    aplicarLimiteFechas();
+    inputMuestreo.addEventListener('change', actualizarFechaEnsayo);
+    actualizarFechaEnsayo();
 
     // Mostrar el paso inicial (el 1, o el que tenga errores del servidor)
     mostrarPaso(pasoActual);

@@ -9,6 +9,12 @@ class Recepcion extends Model
 {
     protected $table = 'recepciones';
     protected $primaryKey = 'id_seg';
+
+    protected $casts = [
+        'eliminado'         => 'boolean',
+        'fecha_eliminacion' => 'datetime',
+    ];
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -25,8 +31,9 @@ class Recepcion extends Model
         'envia',
         'recibe',
         'fecha_muest',
-        'fecha_colado',
         'observ',
+        'eliminado',
+        'fecha_eliminacion',
         'usuario_reg_id',
         'fecha_reg',
     ];
@@ -44,5 +51,10 @@ class Recepcion extends Model
     public function usuarioRegistro()
     {
         return $this->belongsTo(User::class, 'usuario_reg_id');
+    }
+
+    public function scopeActivas($query)
+    {
+        return $query->where('eliminado', false);
     }
 }

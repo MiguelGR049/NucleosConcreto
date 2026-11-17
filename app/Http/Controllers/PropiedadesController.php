@@ -19,8 +19,6 @@ class PropiedadesController extends Controller
         'diametro_2_mm',
         'altura_1_sin_cabeceo_mm',
         'altura_2_sin_cabeceo_mm',
-        'altura_1_con_cabeceo_mm',
-        'altura_2_con_cabeceo_mm',
     ];
 
     public function capturas(Request $request)
@@ -33,6 +31,7 @@ class PropiedadesController extends Controller
 
         $muestras = DB::table('fechas_ensayo as f')
             ->join('recepciones as r', 'r.id_seg', '=', 'f.recepcion_id')
+            ->where('r.eliminado', 0)
             ->whereDate('f.fecha_ensayo', $fecha)
             ->select(
                 'f.id_seg',
@@ -89,9 +88,7 @@ class PropiedadesController extends Controller
             'nucleos.*.diametro_1_mm' => 'required|numeric|gt:0|max:9999.99',
             'nucleos.*.diametro_2_mm' => 'required|numeric|gt:0|max:9999.99',
             'nucleos.*.altura_1_sin_cabeceo_mm' => 'required|numeric|gt:0|max:99999.99',
-            'nucleos.*.altura_2_sin_cabeceo_mm' => 'required|numeric|gt:0|max:99999.99',
-            'nucleos.*.altura_1_con_cabeceo_mm' => 'required|numeric|gt:0|max:99999.99',
-            'nucleos.*.altura_2_con_cabeceo_mm' => 'required|numeric|gt:0|max:99999.99',
+            'nucleos.*.altura_2_sin_cabeceo_mm' => 'required|numeric|gt:0|max:99999.99'
         ]);
 
         $fechaEnsayo = FechaEnsayo::findOrFail($datos['fecha_ensayo_id']);

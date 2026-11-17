@@ -17,7 +17,10 @@ class ConsultaController extends Controller
         $q = strtoupper(trim($request->input('q', '')));
         $todas = $request->boolean('todas');
 
-        $query = DB::table('recepciones')->orderByDesc('fecha_rec')->limit(30);
+        $query = DB::table('recepciones')
+            ->where('eliminado', 0)
+            ->orderByDesc('fecha_rec')
+            ->limit(30);
 
         if ($q !== '') {
             $query->where(function ($w) use ($q) {
