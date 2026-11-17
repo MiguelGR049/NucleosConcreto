@@ -11,7 +11,7 @@ class UsuariosController extends Controller
 {
     private function areas(): array
     {
-        return ['TI', 'ADMIN', 'LABORATORIO']; // ajústala a tus áreas reales
+        return ['TI', 'Administacion', 'Laboratorio']; // ajústala a tus áreas reales
     }
 
     public function usuario()

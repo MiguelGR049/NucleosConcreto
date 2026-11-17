@@ -80,11 +80,27 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Contraseña</label>
-                    <input type="password" name="password" class="form-control" minlength="6" required autocomplete="new-password">
+                    <div class="input-group">
+                        <input type="password" name="password" class="form-control" minlength="6" required autocomplete="new-password">
+                        <button
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            onclick="mostrarPassword(this)">
+                            <i class="fa-solid fa-eye-slash"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Confirmar contraseña</label>
-                    <input type="password" name="password_confirmation" class="form-control" minlength="6" required autocomplete="new-password">
+                    <div class="input-group">
+                        <input type="password" name="password_confirmation" class="form-control" minlength="6" required autocomplete="new-password">
+                        <button
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            onclick="mostrarPassword(this)">
+                            <i class="fa-solid fa-eye-slash"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -151,11 +167,27 @@
                     <p class="small text-muted mb-2">Deja la contraseña vacía si no deseas cambiarla.</p>
                     <div class="mb-3">
                         <label class="form-label">Nueva contraseña</label>
-                        <input type="password" name="password" class="form-control" minlength="6" autocomplete="new-password">
+                        <div class="input-group">
+                            <input type="password" name="password" class="form-control" minlength="6" autocomplete="new-password">
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary"
+                                onclick="mostrarPassword(this)">
+                                <i class="fa-solid fa-eye-slash"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Confirmar nueva contraseña</label>
-                        <input type="password" name="password_confirmation" class="form-control" minlength="6" autocomplete="new-password">
+                        <div class="input-group">
+                            <input type="password" name="password_confirmation" class="form-control" minlength="6" autocomplete="new-password">
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary"
+                                onclick="mostrarPassword(this)">
+                                <i class="fa-solid fa-eye-slash"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
