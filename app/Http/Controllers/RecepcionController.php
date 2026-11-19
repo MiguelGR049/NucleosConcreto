@@ -11,6 +11,7 @@ use App\Models\FechaEnsayo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class RecepcionController extends Controller
 {
@@ -74,12 +75,46 @@ class RecepcionController extends Controller
             return redirect()->route("login");
         }
 
+        // Normaliza a mayúsculas todos los campos de texto
+        $request->merge(array_map(
+            fn($v) => is_string($v) ? mb_strtoupper(trim($v), 'UTF-8') : $v,
+            $request->only([
+                'clave_obra',
+                'cliente',
+                'obra',
+                'atencion_a',
+                'numero_informe',
+                'datos_proyecto',
+                'defectos_especimen',
+                'envia',
+                'recibe',
+                'observaciones',
+            ])
+        ));
+
+        if (is_array($request->input('especimenes'))) {
+            $especimenes = $request->input('especimenes');
+            foreach ($especimenes as $i => $e) {
+                foreach (['numero_muestra', 'elemento', 'localizacion'] as $campo) {
+                    if (isset($e[$campo]) && is_string($e[$campo])) {
+                        $especimenes[$i][$campo] = mb_strtoupper(trim($e[$campo]), 'UTF-8');
+                    }
+                }
+            }
+            $request->merge(['especimenes' => $especimenes]);
+        }
+
         $validated = $request->validate([
             'clave_obra' => 'required|string|max:50',
             'cliente' => 'nullable|string|max:100',
             'obra' => 'nullable|string|max:100',
             'atencion_a' => 'nullable|string|max:100',
-            'numero_informe' => 'nullable|string|max:50',
+            'numero_informe' => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('recepciones', 'n_informe')->where('eliminado', 0),
+            ],
             'fecha_recepcion' => 'required|date',
             'num_especimenes' => 'required|integer|min:1|max:5',
             'especimenes' => 'required|array|min:1|max:5',
@@ -97,6 +132,8 @@ class RecepcionController extends Controller
             'envia' => 'nullable|string|max:100',
             'recibe' => 'nullable|string|max:100',
             'observaciones' => 'nullable|string',
+        ], [
+            'numero_informe.unique' => 'El número de informe :input ya está registrado en otra recepción.',
         ]);
 
         // Regla de negocio: no más fechas de ensayo que especímenes
@@ -216,5 +253,19 @@ class RecepcionController extends Controller
         }
 
         return '1' . chr(ord($letra) + 1) . $sufijo;   // 9A -> 1B
+    }
+
+    public function verificarInforme(Request $request)
+    {
+        if (!session()->has('sesionUsuario')) {
+            return response()->json(['existe' => false], 401);
+        }
+
+        $numero = mb_strtoupper(trim($request->query('numero', '')), 'UTF-8');
+
+        $existe = $numero !== ''
+            && Recepcion::where('n_informe', $numero)->where('eliminado', 0)->exists();
+
+        return response()->json(['existe' => $existe]);
     }
 }

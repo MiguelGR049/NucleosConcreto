@@ -50,13 +50,14 @@ class PropiedadesController extends Controller
             ->orderBy('r.folio')
             ->get();
 
-        // Cuántos núcleos se pueden capturar en cada fecha y cuáles están pendientes
+        // Cuántos núcleos se pueden capturar cuáles están pendientes
         $muestras->each(function ($m) {
             $cap = $this->capacidad($m->recepcion_id);
             $m->restantes   = $cap['restantes'];
             $m->pendientes  = $cap['pendientes'];
             $m->nucleos     = $cap['nucleos'];
             $m->max_nucleos = $m->capturada ? 0 : $cap['max'];
+            $m->min_nucleos = $m->capturada ? 0 : $cap['min'];
         });
 
         return response()
@@ -102,6 +103,13 @@ class PropiedadesController extends Controller
         // Regla: cada fecha pendiente necesita al menos 1 núcleo
         $nucleos = array_values($datos['nucleos']);
         $cap     = $this->capacidad($fechaEnsayo->recepcion_id);
+
+        if (count($nucleos) < $cap['min']) {
+            return back()->withInput()->withErrors([
+                'nucleos' => "Debes capturar los {$cap['min']} núcleo(s) de esta recepción antes de guardar. "
+                    . "Solo capturaste " . count($nucleos) . ".",
+            ]);
+        }
 
         if (count($nucleos) > $cap['max']) {
             return back()->withInput()->withErrors([
@@ -166,11 +174,18 @@ class PropiedadesController extends Controller
 
         $restantes = $nucleos->count();
 
+        $max = max(0, min(self::MAX_COLUMNAS, $restantes - max(0, $pendientes - 1)));
+
+        // Núcleos que no caben en las demás fechas pendientes (cada una admite hasta MAX_COLUMNAS)
+        $min = max(1, $restantes - max(0, $pendientes - 1) * self::MAX_COLUMNAS);
+        $min = min($min, $max);   // nunca más que el máximo permitido
+
         return [
             'restantes'  => $restantes,
             'pendientes' => $pendientes,
             'nucleos'    => $nucleos,
-            'max'        => max(0, min(self::MAX_COLUMNAS, $restantes - max(0, $pendientes - 1))),
+            'max'        => $max,
+            'min'        => $min,
         ];
     }
 }

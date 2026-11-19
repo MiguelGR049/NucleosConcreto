@@ -11,18 +11,18 @@
 $filas = [
 ['k' => 'no_nucleo', 'l' => 'No. de muestra / núcleo', 't' => 'select'],
 ['k' => 'elemento', 'l' => 'Elemento', 't' => 'info'],
-['k' => 'espesor', 'l' => 'Espesor mm', 't' => 'info'],
+['k' => 'espesor', 'l' => 'Espesor, mm', 't' => 'info'],
 ['k' => 'localizacion', 'l' => 'Localización', 't' => 'info'],
 ['k' => 'dia', 'l' => 'Edad de ensayo días', 't' => 'info'],
-['k' => 'masa_g', 'l' => 'Masa del espécimen g', 't' => 'num'],
-['k' => 'masa_unitaria', 'l' => 'Masa unitaria kg/m³', 't' => 'calc', 'd' => 2],
-['k' => 'diametro_1_mm', 'l' => 'Diámetro 1 mm', 't' => 'num'],
-['k' => 'diametro_2_mm', 'l' => 'Diámetro 2 mm', 't' => 'num'],
-['k' => 'diametro_prom', 'l' => 'Diámetro promedio mm', 't' => 'calc', 'd' => 2],
-['k' => 'altura_1_sin_cabeceo_mm', 'l' => 'Altura 1 sin cabeceo mm', 't' => 'num'],
-['k' => 'altura_2_sin_cabeceo_mm', 'l' => 'Altura 2 sin cabeceo mm', 't' => 'num'],
-['k' => 'altura_prom_sin', 'l' => 'Altura promedio sin cabeceo mm','t' => 'calc', 'd' => 2],
-['k' => 'area', 'l' => 'Área cm²', 't' => 'calc', 'd' => 2],
+['k' => 'masa_g', 'l' => 'Masa del espécimen, g', 't' => 'num'],
+['k' => 'masa_unitaria', 'l' => 'Masa unitaria, kg/m³', 't' => 'calc', 'd' => 2],
+['k' => 'diametro_1_mm', 'l' => 'Diámetro 1, mm', 't' => 'num'],
+['k' => 'diametro_2_mm', 'l' => 'Diámetro 2, mm', 't' => 'num'],
+['k' => 'diametro_prom', 'l' => 'Diámetro promedio, mm', 't' => 'calc', 'd' => 2],
+['k' => 'altura_1_sin_cabeceo_mm', 'l' => 'Altura 1 sin cabeceo, mm', 't' => 'num'],
+['k' => 'altura_2_sin_cabeceo_mm', 'l' => 'Altura 2 sin cabeceo, mm', 't' => 'num'],
+['k' => 'altura_prom_sin', 'l' => 'Altura promedio sin cabeceo, mm','t' => 'calc', 'd' => 2],
+['k' => 'area', 'l' => 'Área, cm²', 't' => 'calc', 'd' => 2],
 ];
 @endphp
 
@@ -92,6 +92,7 @@ $filas = [
                                             data-nucleos="{{ json_encode($m->nucleos) }}"
                                             data-dia="{{ $m->dia }}"
                                             data-max="{{ $m->max_nucleos }}"
+                                            data-min="{{ $m->min_nucleos }}"
                                             data-restantes="{{ $m->restantes }}"
                                             data-pendientes="{{ $m->pendientes }}"
                                             {{ $m->capturada ? 'checked disabled' : '' }}>
@@ -159,27 +160,17 @@ $filas = [
                             <input type="hidden" name="tmn">
                         </div>
                         <div class="col-6 col-md-3">
-                            <label class="form-label" for="resistencia">Resistencia kg/cm²</label>
+                            <label class="form-label" for="resistencia">Resistencia, kg/cm²</label>
                             <input type="text" inputmode="decimal" autocomplete="off"
                                 id="resistencia" class="form-control campo-num">
                             <input type="hidden" name="resistencia_proyecto">
                         </div>
                     </div>
 
-                    {{-- Cuántos núcleos se capturan --}}
-                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold" id="contador-nucleos">Núcleos: 1</div>
-                            <small class="text-muted" id="info-capacidad"></small>
-                        </div>
-                        <div class="btn-group btn-group-sm">
-                            <button type="button" class="btn btn-nucleo" id="btn-quitar-nucleo">
-                                <i class="bi bi-dash-lg"></i> Quitar
-                            </button>
-                            <button type="button" class="btn btn-nucleo" id="btn-agregar-nucleo">
-                                <i class="bi bi-plus-lg"></i> Agregar núcleo
-                            </button>
-                        </div>
+                    {{-- Núcleos que se capturan --}}
+                    <div class="mb-2">
+                        <div class="fw-semibold" id="contador-nucleos">Núcleos a capturar: 1</div>
+                        <small class="text-muted" id="info-capacidad"></small>
                     </div>
 
                     {{-- Tabla de resultados --}}

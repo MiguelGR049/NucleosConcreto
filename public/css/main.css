@@ -266,6 +266,18 @@ body {
     color: #fff;
 }
 
+/* Campos de texto en mayúsculas (solo visual) */
+.recepcion-card input[type="text"],
+.recepcion-card textarea {
+    text-transform: uppercase;
+}
+
+/* Los placeholders no se afectan por defecto; si los quieres en mayúsculas también: */
+.recepcion-card input[type="text"]::placeholder,
+.recepcion-card textarea::placeholder {
+    text-transform: none;
+}
+
 /* Fechas de ensayo */
 .ensayo-fila {
     width: 100%;

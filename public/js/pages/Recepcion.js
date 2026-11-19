@@ -86,6 +86,29 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    /* ===================== MAYÚSCULAS EN CAMPOS DE TEXTO ===================== */
+    const selectorTexto = 'input[type="text"], textarea';
+
+    // Convierte mientras se escribe, conservando la posición del cursor
+    form.addEventListener('input', function (e) {
+        const el = e.target;
+        if (!el.matches(selectorTexto)) return;
+
+        const inicio = el.selectionStart;
+        const fin = el.selectionEnd;
+        el.value = el.value.toUpperCase();
+        el.setSelectionRange(inicio, fin);
+    });
+
+    // Por si algún valor llega por old() o por autorrelleno
+    function convertirTodoAMayusculas() {
+        form.querySelectorAll(selectorTexto).forEach(function (el) {
+            if (!el.readOnly) el.value = el.value.toUpperCase();
+        });
+    }
+    convertirTodoAMayusculas();
+    form.addEventListener('submit', convertirTodoAMayusculas);
+
     /* ===================== AUTORRELLENO POR CLAVE DE OBRA ===================== */
     const inputClave = document.getElementById('clave_obra');
     const urlObra = form.dataset.urlObra;
@@ -113,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!datos.encontrada) return;
 
             for (const nombre in camposObra) {
-                camposObra[nombre].value = datos[nombre] ?? '';
+                camposObra[nombre].value = (datos[nombre] ?? '').toUpperCase();
             }
         } catch (e) {
             console.error('No se pudo consultar la obra', e);
@@ -127,6 +150,72 @@ document.addEventListener('DOMContentLoaded', function () {
             temporizadorObra = setTimeout(buscarObra, 400);
         });
         inputClave.addEventListener('blur', buscarObra);
+    }
+
+    /* ===================== VERIFICAR NÚMERO DE INFORME ===================== */
+    const inputInforme = document.getElementById('numero_informe');
+    const urlInforme = form.dataset.urlInforme;
+    const MSG_INFORME = 'Este número de informe ya existe.';
+
+    let temporizadorInforme;
+    let ultimoInforme = '';
+
+    function limpiarInforme() {
+        inputInforme.setCustomValidity('');
+        inputInforme.classList.remove('is-invalid');
+    }
+
+    async function verificarInforme() {
+        const valor = inputInforme.value.trim().toUpperCase();
+
+        if (valor === '') {
+            ultimoInforme = '';
+            limpiarInforme();
+            return;
+        }
+        if (valor === ultimoInforme) return;
+        ultimoInforme = valor;
+
+        try {
+            const resp = await fetch(urlInforme + '?numero=' + encodeURIComponent(valor), {
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!resp.ok) return;
+
+            const datos = await resp.json();
+
+            // Si el usuario siguió escribiendo mientras respondía el servidor, se ignora
+            if (inputInforme.value.trim().toUpperCase() !== valor) return;
+
+            if (datos.existe) {
+                inputInforme.setCustomValidity(MSG_INFORME);
+                inputInforme.classList.add('is-invalid');
+            } else {
+                limpiarInforme();
+            }
+        } catch (e) {
+            console.error('No se pudo verificar el número de informe', e);
+        }
+    }
+
+    if (inputInforme && urlInforme) {
+        inputInforme.addEventListener('input', function () {
+            limpiarInforme();
+            ultimoInforme = '';
+            clearTimeout(temporizadorInforme);
+            temporizadorInforme = setTimeout(verificarInforme, 400);
+        });
+        inputInforme.addEventListener('blur', verificarInforme);
+
+        // Si la respuesta llega cuando el usuario ya está en otro paso, el navegador
+        // no puede enfocar un campo oculto y bloquearía el envío sin avisar
+        form.addEventListener('submit', function (e) {
+            if (!inputInforme.checkValidity()) {
+                e.preventDefault();
+                mostrarPaso(1);
+                inputInforme.reportValidity();
+            }
+        });
     }
 
     /* ===================== ESPECÍMENES ===================== */
@@ -153,6 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function sincronizar() {
             const esOtro = select.value === '__otro__';
+            otro.addEventListener('input', sincronizar);
             otro.classList.toggle('d-none', !esOtro);
             otro.required = esOtro && !select.disabled;
             oculto.value = esOtro ? otro.value : select.value;

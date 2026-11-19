@@ -101,8 +101,8 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label small mb-1" for="mdMuestreadoPor">Muestreado por</label>
-                            <select name="muestreado_por" id="mdMuestreadoPor" class="form-select form-select-sm">
-                                <option value="-">-</option>
+                            <select name="muestreado_por" id="mdMuestreadoPor" class="form-select form-select-sm" required>
+                                <option value="" selected disabled>-</option>
                                 <option value="LIEC">LIEC</option>
                                 <option value="CLIENTE">CLIENTE</option>
                             </select>

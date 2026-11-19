@@ -114,9 +114,9 @@ class ConsultaController extends Controller
             ->margins(0, 0, 0, 0)
             ->pdf();
 
-        return response()->streamDownload(
-            fn() => print($pdfBinary),
-            "Informe_{$folio}_{$sufijo}.pdf"
-        );
+        return response($pdfBinary, 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => "inline; filename=\"Informe_{$folio}_{$sufijo}.pdf\"",
+        ]);
     }
 }

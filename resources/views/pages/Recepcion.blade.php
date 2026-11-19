@@ -48,7 +48,7 @@ $pasoInicial = $pasosConError ? min($pasosConError) : 1;
             </div>
             @endif
 
-            <form action="{{ route('recepcion.store') }}" method="POST" id="formRecepcion" data-paso-inicial="{{ $pasoInicial }}" data-url-obra="{{ route('recepcion.obra') }}">
+            <form action="{{ route('recepcion.store') }}" method="POST" id="formRecepcion" data-paso-inicial="{{ $pasoInicial }}" data-url-obra="{{ route('recepcion.obra') }}" data-url-informe="{{ route('recepcion.informe') }}">
                 @csrf
 
                 {{-- ================= PASO 1 ================= --}}
@@ -82,7 +82,11 @@ $pasoInicial = $pasosConError ? min($pasosConError) : 1;
 
                         <div class="col-12">
                             <label class="form-label">Número de informe</label>
-                            <input type="text" name="numero_informe" class="form-control" placeholder="Ej. INF-001" value="{{ old('numero_informe') }}">
+                            <input type="text" name="numero_informe" id="numero_informe" class="form-control"
+                                placeholder="Ej. INF-001" value="{{ old('numero_informe') }}">
+                            <div class="invalid-feedback" id="informe-feedback">
+                                Este número de informe ya está registrado.
+                            </div>
                         </div>
 
                         <div class="col-12">
@@ -131,7 +135,7 @@ $pasoInicial = $pasosConError ? min($pasosConError) : 1;
                                     </div>
 
                                     <div class="col-12">
-                                        <label class="form-label">Espesor (mm)</label>
+                                        <label class="form-label">Espesor, mm</label>
                                         <input type="number" name="especimenes[{{ $i }}][espesor]" class="form-control"
                                             step="0.01" min="0" inputmode="decimal" required
                                             value="{{ old('especimenes.'.$i.'.espesor') }}">

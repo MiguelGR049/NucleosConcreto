@@ -48,6 +48,12 @@ document.addEventListener('DOMContentLoaded', function () {
         return redondear(n, 1).toFixed(1);
     }
 
+    // Para el PDF: siempre 2 decimales (12 -> "12.00")
+    function fmtPdf2(n) {
+        if (n === null || n === undefined || !isFinite(n)) return '';
+        return redondear(n, 2).toFixed(2);
+    }
+
     const fecha = f => {
         if (!f || String(f).startsWith('0000')) return '';
         const [a, m, d] = String(f).substring(0, 10).split('-');
@@ -262,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function () {
             directo: fmtPdf1(c.esfDirecto),
             real: fmtPdf1(c.esfReal),
             mpa: fmtPdf1(c.esfMpa),
-            u: fmtPdf(c.u, 2),
+            u: fmtPdf2(c.u, 2),
         };
     }
 

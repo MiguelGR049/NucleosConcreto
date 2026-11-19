@@ -336,7 +336,7 @@
                     <td class="az">REGLA DE DECISIÓN:</td>
                     <td style="font-size:6.3pt; line-height:9.1pt; white-space:normal; text-align: center; padding: 2pt 4pt;">
                         Considerando U con k=2, <b>CUMPLE</b> – El resultado se encuentra dentro del AL de la especificación;
-                        <b>NO CUMPLE</b> – Alguna (s) de la determinación (s) no se encuentra dentro del TL.
+                        <b>NO CUMPLE</b> – Alguna(s) de la determinación(s) no se encuentra dentro del TL.
                         (AL: Límite de aceptación - TL: Límite de tolerancia).
                     </td>
                 </tr>

@@ -20,6 +20,7 @@ Route::get('/inicio', [HomeController::class, 'inicio'])->name('inicio');
 Route::get('/recepcion', [RecepcionController::class, 'crear'])->name('recepcion');
 Route::get('/recepcion/obra', [RecepcionController::class, 'buscarObra'])->name('recepcion.obra');
 Route::post('/recepcion', [RecepcionController::class, 'store'])->name('recepcion.store');
+Route::get('/recepcion/informe', [RecepcionController::class, 'verificarInforme'])->name('recepcion.informe');
 
 Route::get('/propiedades', [PropiedadesController::class, 'capturas'])->name('propiedades');
 Route::post('/propiedades', [PropiedadesController::class, 'guardar'])->name('propiedades.guardar');

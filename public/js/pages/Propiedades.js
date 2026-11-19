@@ -4,8 +4,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalEl = document.getElementById('modalHoja');
     const formHoja = document.getElementById('formHoja');
     const btnGuardar = document.getElementById('btn-guardar-hoja');
-    const btnAgregar = document.getElementById('btn-agregar-nucleo');
-    const btnQuitar = document.getElementById('btn-quitar-nucleo');
     const contador = document.getElementById('contador-nucleos');
     const infoCap = document.getElementById('info-capacidad');
 
@@ -14,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const DEC_REAL = 4;          // decimales que se conservan (igual que la base de datos)
     const PI_XLS = 3.1416;     // el mismo valor que usa el Excel
 
+    let minPermitido = 1;            // núcleos que es obligatorio capturar
     let maxPermitido = 1;            // tope para la fecha elegida (lo calcula el servidor)
     let nucleosPend = [];            // núcleos pendientes de la recepción elegida
     let nColumnas = 1;            // columnas visibles ahora
@@ -127,21 +126,18 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('h-datos').value = d.datos || '';
 
         maxPermitido = Math.min(parseInt(d.max, 10), MAX_COLUMNAS);
+        minPermitido = Math.max(1, Math.min(parseInt(d.min, 10) || 1, maxPermitido));
 
-        infoCap.textContent =
-            'Quedan ' + d.restantes + ' núcleo(s) por ensayar en esta recepción y ' +
-            d.pendientes + ' fecha(s) de ensayo pendiente(s). ' +
-            'En esta fecha puedes capturar hasta ' + maxPermitido + '.';
+        infoCap.textContent = 'Debes capturar los ' + minPermitido + ' núcleo(s) de esta recepción para poder guardar.';
 
         nucleosPend = JSON.parse(d.nucleos || '[]');
         llenarSelects();
 
-        // La edad es la misma en todas las columnas
         for (let c = 0; c < MAX_COLUMNAS; c++) {
             setInfo(c, 'dia', d.dia);
         }
 
-        activarColumnas(1);
+        activarColumnas(minPermitido);   // antes: activarColumnas(1)
         bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
 
@@ -177,35 +173,11 @@ document.addEventListener('DOMContentLoaded', function () {
             mostrarInfoNucleo(c);
             calcular(c);
         }
+
         refrescarOpciones();
 
-        contador.textContent = 'Núcleos: ' + n + ' de ' + maxPermitido;
-        btnAgregar.disabled = n >= maxPermitido;
-        btnQuitar.disabled = n <= 1;
+        contador.textContent = 'Núcleos a capturar: ' + n;
     }
-
-
-    btnAgregar.addEventListener('click', function () {
-        if (nColumnas >= maxPermitido) return;
-        activarColumnas(nColumnas + 1);
-
-        const nuevo = document.querySelector('[name="nucleos[' + (nColumnas - 1) + '][no_nucleo]"]');
-        if (nuevo) nuevo.focus();
-    });
-
-    btnQuitar.addEventListener('click', function () {
-        if (nColumnas <= 1) return;
-
-        const ultima = nColumnas - 1;
-        const conDatos = Array.from(
-            document.querySelectorAll('#tabla-hoja [data-col="' + ultima + '"] input')
-        ).some(function (i) { return i.value.trim() !== ''; });
-
-        if (conDatos && !confirm('¿Quitar el último núcleo? Se perderán los datos que capturaste en esa columna.')) {
-            return;
-        }
-        activarColumnas(nColumnas - 1);
-    });
 
     /* ---------- Helpers ---------- */
     function selectNucleo(c) {
@@ -327,6 +299,15 @@ document.addEventListener('DOMContentLoaded', function () {
             invalido.setCustomValidity('Escribe un número válido');
             invalido.reportValidity();
             invalido.setCustomValidity('');
+            return;
+        }
+
+        const sinElegir = Array.from(formHoja.querySelectorAll('.select-nucleo:not(:disabled)'))
+            .find(s => !s.value);
+
+        if (nColumnas < minPermitido || sinElegir) {
+            e.preventDefault();
+            avisar('Debes capturar todos los núcleos de la recepción antes de guardar.');
             return;
         }
 
